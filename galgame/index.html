@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#17131f">
+  <title>玻璃夜 · Galgame Prototype</title>
+  <style>
+    :root{--ink:#fff;--muted:#c8bfd5;--panel:rgba(14,10,22,.84);--line:rgba(255,255,255,.16);--pink:#ff84bc;--violet:#9c8cff}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b0910;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button{font:inherit;color:inherit}
+    .game{position:relative;width:100%;height:100dvh;overflow:hidden;background:linear-gradient(145deg,#20243a,#281d33 45%,#12101a)}
+    .bg{position:absolute;inset:0;background-position:center;background-size:cover;filter:saturate(.92);transition:opacity .35s ease}.bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,5,12,.05),rgba(7,5,12,.22) 58%,rgba(7,5,12,.65))}
+    .fallback-bg{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.18);font-size:clamp(28px,7vw,64px);font-weight:1000;letter-spacing:.12em;background:radial-gradient(circle at 25% 20%,rgba(255,132,188,.17),transparent 30%),radial-gradient(circle at 80% 18%,rgba(156,140,255,.17),transparent 33%)}
+    .sprites{position:absolute;inset:0 0 150px;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}.sprite{position:absolute;bottom:0;max-height:86%;max-width:60%;object-fit:contain;filter:drop-shadow(0 12px 22px rgba(0,0,0,.38));transition:opacity .25s ease,transform .25s ease}.sprite.left{left:2%;transform:translateX(-2%)}.sprite.center{left:50%;transform:translateX(-50%)}.sprite.right{right:2%;transform:translateX(2%)}.sprite.hidden{opacity:0;visibility:hidden}
+    .sprite-placeholder{position:absolute;bottom:18px;width:min(34vw,260px);height:min(54vh,500px);display:grid;place-items:center;border:1px dashed rgba(255,255,255,.2);border-radius:24px;background:rgba(255,255,255,.035);color:rgba(255,255,255,.26);font-weight:900;letter-spacing:.08em;pointer-events:none}.sprite-placeholder.left{left:4%}.sprite-placeholder.center{left:50%;transform:translateX(-50%)}.sprite-placeholder.right{right:4%}
+    .top{position:absolute;z-index:20;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;justify-content:space-between;gap:8px}.pill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(10,7,16,.56);backdrop-filter:blur(8px);font-size:11px;color:var(--muted)}.top-actions{display:flex;gap:6px}.icon-btn{min-width:38px;height:34px;border:1px solid var(--line);border-radius:10px;background:rgba(10,7,16,.6);cursor:pointer}
+    .choices{position:absolute;z-index:25;left:50%;bottom:190px;width:min(90%,560px);transform:translateX(-50%);display:grid;gap:9px}.choices.hidden{display:none}.choice{min-height:48px;padding:10px 14px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(20,14,31,.88);backdrop-filter:blur(10px);font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.22)}.choice:active{transform:scale(.985)}
+    .textbox{position:absolute;z-index:30;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));min-height:132px;padding:20px 18px 16px;border:1px solid var(--line);border-radius:20px;background:var(--panel);backdrop-filter:blur(13px);box-shadow:0 18px 40px rgba(0,0,0,.35);cursor:pointer}.name{position:absolute;left:18px;top:-18px;min-width:110px;padding:8px 13px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,rgba(255,132,188,.95),rgba(156,140,255,.94));font-weight:950;box-shadow:0 8px 22px rgba(0,0,0,.2)}.dialogue{min-height:62px;font-size:clamp(15px,3vw,20px);line-height:1.65}.hint{position:absolute;right:14px;bottom:9px;color:var(--muted);font-size:10px}
+    .cg-layer{position:absolute;z-index:40;inset:0;display:grid;place-items:center;background:#09070d}.cg-layer.hidden{display:none}.cg-layer img{width:100%;height:100%;object-fit:contain}.cg-fallback{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.32);font-size:22px;font-weight:900}.cg-close{position:absolute;top:max(12px,env(safe-area-inset-top));right:12px;z-index:2;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.5);cursor:pointer}
+    .menu{position:absolute;z-index:50;inset:0;display:grid;place-items:center;padding:18px;background:rgba(7,5,12,.74);backdrop-filter:blur(10px)}.menu.hidden{display:none}.menu-card{width:min(100%,420px);padding:22px;border:1px solid var(--line);border-radius:20px;background:rgba(22,16,31,.96)}.menu-card h2{margin:0 0 8px}.menu-card p{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.6}.menu-actions{display:grid;gap:8px}.menu-btn{min-height:46px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.07);cursor:pointer}.menu-btn.primary{background:linear-gradient(135deg,#ff75b7,#927dff);font-weight:900}
+    @media(max-width:620px){.sprites{inset-bottom:142px}.sprite{max-width:74%;max-height:78%}.sprite-placeholder{width:42vw;height:45vh}.textbox{min-height:125px;padding:18px 14px 14px}.name{left:14px}.choices{bottom:178px}}
+  </style>
+</head>
+<body>
+<div class="game" id="game">
+  <div class="bg" id="bg"></div>
+  <div class="fallback-bg" id="bgFallback">BACKGROUND</div>
+
+  <div class="sprites">
+    <div class="sprite-placeholder left" id="phLeft">立绘 LEFT</div>
+    <div class="sprite-placeholder center" id="phCenter">立绘 CENTER</div>
+    <div class="sprite-placeholder right" id="phRight">立绘 RIGHT</div>
+    <img id="spriteLeft" class="sprite left hidden" alt="左侧立绘">
+    <img id="spriteCenter" class="sprite center hidden" alt="中间立绘">
+    <img id="spriteRight" class="sprite right hidden" alt="右侧立绘">
+  </div>
+
+  <div class="top">
+    <div class="pill" id="chapter">CHAPTER 1 · 雨夜</div>
+    <div class="top-actions">
+      <button id="saveBtn" class="icon-btn" type="button" title="保存">💾</button>
+      <button id="menuBtn" class="icon-btn" type="button" title="菜单">☰</button>
+    </div>
+  </div>
+
+  <div id="choices" class="choices hidden"></div>
+
+  <div id="textbox" class="textbox">
+    <div id="name" class="name">旁白</div>
+    <div id="dialogue" class="dialogue"></div>
+    <div class="hint">点击继续 ▶</div>
+  </div>
+
+  <div id="cgLayer" class="cg-layer hidden">
+    <div id="cgFallback" class="cg-fallback">CG 图片放这里</div>
+    <img id="cgImage" alt="CG">
+    <button id="cgClose" class="cg-close" type="button">关闭 CG</button>
+  </div>
+
+  <div id="menu" class="menu hidden">
+    <div class="menu-card">
+      <h2>玻璃夜</h2>
+      <p>这是 Galgame 骨架版。你可以把自己的背景、立绘、CG 放进 assets 文件夹，然后在剧情脚本里换成对应文件名。</p>
+      <div class="menu-actions">
+        <button id="continueBtn" class="menu-btn primary" type="button">继续游戏</button>
+        <button id="loadBtn" class="menu-btn" type="button">读取存档</button>
+        <button id="restartBtn" class="menu-btn" type="button">从头开始</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+const state={node:"start",vars:{trust:0,courage:0},typing:false,typingTimer:null,fullText:"",cgOpen:false};
+
+// 图片文件名只是示例。你把自己的图片上传到 galgame/assets/ 后，改这里即可。
+const ASSETS={
+  backgrounds:{rain:"assets/bg-rain.jpg",room:"assets/bg-room.jpg",roof:"assets/bg-roof.jpg"},
+  sprites:{hero:"assets/hero.png",friend:"assets/friend.png"},
+  cgs:{window:"assets/cg-window.jpg",ending:"assets/cg-ending.jpg"}
+};
+
+const story={
+ start:{chapter:"CHAPTER 1 · 雨夜",bg:"rain",name:"旁白",text:"雨下得比预报更早。教学楼最后一盏灯，在玻璃窗里晃成模糊的白色。",sprites:{center:"hero"},next:"meet"},
+ meet:{bg:"rain",name:"？？？",text:"“你还没走？”",sprites:{center:"hero"},next:"choice1"},
+ choice1:{bg:"rain",name:"我",text:"门口的人撑着伞等我。我应该……",choices:[
+   {text:"跟她一起走",to:"walk",vars:{trust:1}},
+   {text:"说自己还有事",to:"stay",vars:{courage:1}}
+ ]},
+ walk:{bg:"rain",name:"她",text:"“那就快点。雨再大一点，我们两个人都会湿透。”",sprites:{left:"hero",right:"friend"},next:"walk2"},
+ walk2:{bg:"room",name:"旁白",text:"我们在便利店屋檐下停住。她忽然看着玻璃里的倒影笑了。",sprites:{right:"friend"},cg:"window",next:"endingCheck"},
+ stay:{bg:"roof",name:"旁白",text:"我一个人走上天台。风很大，门却在身后自己关上了。",sprites:{},next:"stay2"},
+ stay2:{bg:"roof",name:"？？？",text:"“所以你果然会来这里。”",sprites:{center:"friend"},next:"endingCheck"},
+ endingCheck:{name:"旁白",text:"某些决定看起来很小，但它们会悄悄改变之后发生的一切。",next:()=>state.vars.trust>state.vars.courage?"good":"other"},
+ good:{bg:"room",name:"她",text:"“下次下雨的时候，也一起走吧。”",sprites:{center:"hero"},cg:"ending",next:"end"},
+ other:{bg:"roof",name:"旁白",text:"夜色吞掉了最后一点光。故事还没有结束。",sprites:{center:"friend"},next:"end"},
+ end:{name:"SYSTEM",text:"DEMO END · 你已经跑完这个 Galgame 骨架。可以继续往 story 里加章节、角色和分支。",sprites:{}}
+};
+
+function setBackground(key){const el=$("bg"),fallback=$("bgFallback"),src=ASSETS.backgrounds[key];if(!src){el.style.backgroundImage="";fallback.style.display="grid";return}const img=new Image();img.onload=()=>{el.style.backgroundImage=`url('${src}')`;fallback.style.display="none"};img.onerror=()=>{el.style.backgroundImage="";fallback.style.display="grid"};img.src=src}
+function setSprite(pos,key){const el=$("sprite"+pos[0].toUpperCase()+pos.slice(1)),ph=$("ph"+pos[0].toUpperCase()+pos.slice(1));if(!key){el.classList.add("hidden");ph.style.display="none";return}const src=ASSETS.sprites[key];if(!src){el.classList.add("hidden");ph.style.display="grid";return}el.onload=()=>{el.classList.remove("hidden");ph.style.display="none"};el.onerror=()=>{el.classList.add("hidden");ph.style.display="grid"};el.src=src}
+function setSprites(map={}){["left","center","right"].forEach(pos=>setSprite(pos,map[pos]))}
+function showCG(key){const src=ASSETS.cgs[key];if(!src)return;state.cgOpen=true;$("cgLayer").classList.remove("hidden");$("cgFallback").style.display="grid";$("cgImage").style.display="none";$("cgImage").onload=()=>{$("cgFallback").style.display="none";$("cgImage").style.display="block"};$("cgImage").onerror=()=>{$("cgFallback").style.display="grid";$("cgImage").style.display="none"};$("cgImage").src=src}
+function closeCG(){state.cgOpen=false;$("cgLayer").classList.add("hidden")}
+
+function typeText(text){clearInterval(state.typingTimer);state.fullText=text;state.typing=true;$("dialogue").textContent="";let i=0;state.typingTimer=setInterval(()=>{i+=2;$("dialogue").textContent=text.slice(0,i);if(i>=text.length){clearInterval(state.typingTimer);state.typing=false}},22)}
+function finishTyping(){if(!state.typing)return false;clearInterval(state.typingTimer);$("dialogue").textContent=state.fullText;state.typing=false;return true}
+
+function go(id){if(typeof id==="function")id=id();const node=story[id];if(!node)return;state.node=id;$("chapter").textContent=node.chapter||$("chapter").textContent;if(node.bg)setBackground(node.bg);if(node.sprites!==undefined)setSprites(node.sprites);$("name").textContent=node.name||"旁白";typeText(node.text||"");renderChoices(node.choices);if(node.cg)setTimeout(()=>showCG(node.cg),350)}
+function renderChoices(choices){const box=$("choices");box.innerHTML="";if(!choices?.length){box.classList.add("hidden");return}box.classList.remove("hidden");choices.forEach(choice=>{const b=document.createElement("button");b.className="choice";b.type="button";b.textContent=choice.text;b.onclick=e=>{e.stopPropagation();if(choice.vars)Object.entries(choice.vars).forEach(([k,v])=>state.vars[k]=(state.vars[k]||0)+v);box.classList.add("hidden");go(choice.to)};box.appendChild(b)})}
+function advance(){if(state.cgOpen)return;if(finishTyping())return;const node=story[state.node];if(node?.choices?.length)return;if(node?.next)go(node.next)}
+function save(){try{localStorage.setItem("glass-night-save",JSON.stringify({node:state.node,vars:state.vars}));$("saveBtn").textContent="✓";setTimeout(()=>$("saveBtn").textContent="💾",800)}catch(_){}}
+function load(){try{const raw=localStorage.getItem("glass-night-save");if(!raw)return;const data=JSON.parse(raw);state.vars=data.vars||{trust:0,courage:0};$("menu").classList.add("hidden");go(data.node||"start")}catch(_){}}
+function restart(){state.vars={trust:0,courage:0};$("menu").classList.add("hidden");go("start")}
+
+$("textbox").addEventListener("click",advance);$("cgClose").onclick=closeCG;$("cgLayer").addEventListener("click",e=>{if(e.target===$("cgLayer")||e.target===$("cgImage"))closeCG()});$("saveBtn").onclick=save;$("menuBtn").onclick=()=>$("menu").classList.remove("hidden");$("continueBtn").onclick=()=>$("menu").classList.add("hidden");$("loadBtn").onclick=load;$("restartBtn").onclick=restart;
+window.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="Enter"){e.preventDefault();advance()}else if(e.code==="Escape"){state.cgOpen?closeCG():$("menu").classList.toggle("hidden")}});
+go("start");
+})();
+</script>
+</body>
+</html>
