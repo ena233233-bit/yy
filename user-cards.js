@@ -1,3 +1,5 @@
+const SCREENSHOT_IMPORT_FLAG = "pjsk-en-screenshot-cards-imported-v1";
+
 const SCREENSHOT_PRESET_CARDS = [
   {
     presetKey: "the-arrogant-princess-rin",
@@ -152,6 +154,8 @@ const SCREENSHOT_PRESET_CARDS = [
 ];
 
 function mergeScreenshotPresetCards() {
+  if (localStorage.getItem(SCREENSHOT_IMPORT_FLAG) === "1") return;
+
   const existingKeys = new Set(
     state.cards.map(card => card.presetKey || `${card.name}|${card.characterName}|${card.talent}|${card.masterRank}`)
   );
@@ -164,6 +168,8 @@ function mergeScreenshotPresetCards() {
     existingKeys.add(card.presetKey);
     added += 1;
   }
+
+  localStorage.setItem(SCREENSHOT_IMPORT_FLAG, "1");
 
   if (added > 0) {
     saveLocal();
