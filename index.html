@@ -2,207 +2,912 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1cc7d0">
-  <meta name="description" content="Project Sekai EN 活动配队器：活动规则、账号加成、个人卡库与自动推荐。">
-  <title>Project Sekai EN 配队器</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b1020">
+  <title>NEON BEAT</title>
+  <style>
+    :root {
+      --bg: #070a14;
+      --panel: rgba(18, 24, 45, .84);
+      --line: rgba(255,255,255,.11);
+      --text: #f7f8ff;
+      --muted: #a8afca;
+      --cyan: #36e2ff;
+      --pink: #ff62b5;
+      --violet: #9b77ff;
+      --lime: #91ff88;
+      --danger: #ff5c78;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+    body {
+      min-height: 100dvh;
+      overflow-x: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(54,226,255,.18), transparent 32rem),
+        radial-gradient(circle at 90% 5%, rgba(255,98,181,.16), transparent 34rem),
+        linear-gradient(180deg, #0b1020, #060812 75%);
+    }
+
+    button, select { font: inherit; }
+    button { border: 0; color: inherit; }
+
+    .app {
+      width: min(100%, 900px);
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brand-small {
+      margin: 0 0 2px;
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .18em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 46px);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    select, .small-btn {
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      outline: none;
+    }
+
+    select option { color: #111; }
+    .small-btn { cursor: pointer; font-weight: 800; }
+    .small-btn:active { transform: scale(.97); }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .hud-card {
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+    }
+
+    .hud-label {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hud-value {
+      margin-top: 2px;
+      overflow: hidden;
+      font-size: clamp(16px, 4vw, 24px);
+      font-weight: 950;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .life-wrap {
+      height: 7px;
+      margin-bottom: 9px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .life-bar {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--pink), var(--cyan), var(--lime));
+      transition: width .18s ease;
+    }
+
+    .game-shell {
+      position: relative;
+      width: min(100%, 560px);
+      height: min(72dvh, 720px);
+      min-height: 470px;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)),
+        #090d19;
+      box-shadow: 0 28px 70px rgba(0,0,0,.42), inset 0 0 40px rgba(88,99,255,.05);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .game-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(180deg, transparent 0 58px, rgba(255,255,255,.025) 59px 60px);
+    }
+
+    .lanes {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .lane {
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .lane:last-child { border-right: 0; }
+    .lane.active { background: rgba(255,255,255,.055); }
+
+    .hit-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 92px;
+      height: 3px;
+      z-index: 5;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.95) 18%, rgba(255,255,255,.95) 82%, transparent);
+      box-shadow: 0 0 18px rgba(255,255,255,.55);
+      pointer-events: none;
+    }
+
+    .judge {
+      position: absolute;
+      z-index: 20;
+      left: 50%;
+      top: 48%;
+      transform: translate(-50%, -50%) scale(.85);
+      min-width: 150px;
+      text-align: center;
+      font-size: clamp(25px, 8vw, 44px);
+      font-weight: 1000;
+      letter-spacing: -.04em;
+      opacity: 0;
+      pointer-events: none;
+      text-shadow: 0 4px 18px rgba(0,0,0,.55);
+    }
+    .judge.show { animation: judgePop .38s ease-out; }
+    .judge.perfect { color: #fff; text-shadow: 0 0 8px var(--cyan), 0 0 24px var(--violet); }
+    .judge.great { color: var(--cyan); }
+    .judge.good { color: #ffe477; }
+    .judge.miss { color: var(--danger); }
+    @keyframes judgePop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+      100% { opacity: 0; transform: translate(-50%, -68%) scale(1); }
+    }
+
+    .note {
+      position: absolute;
+      z-index: 8;
+      left: 9%;
+      width: 82%;
+      height: 24px;
+      border: 2px solid rgba(255,255,255,.76);
+      border-radius: 8px;
+      transform: translateY(-50%);
+      box-shadow: 0 0 12px currentColor;
+      will-change: top;
+      pointer-events: none;
+    }
+    .note.l0 { color: var(--cyan); background: linear-gradient(90deg, #1dbcd6, #56ecff); }
+    .note.l1 { color: var(--pink); background: linear-gradient(90deg, #e94398, #ff82c5); }
+    .note.l2 { color: var(--violet); background: linear-gradient(90deg, #7258dc, #a990ff); }
+    .note.l3 { color: var(--lime); background: linear-gradient(90deg, #58cf6b, #a8ff91); }
+
+    .lane-buttons {
+      position: absolute;
+      z-index: 10;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 88px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 6px;
+      background: linear-gradient(180deg, transparent, rgba(3,5,12,.82) 22%);
+    }
+
+    .lane-btn {
+      touch-action: none;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 12px;
+      background: rgba(255,255,255,.075);
+      font-weight: 950;
+      font-size: 17px;
+      cursor: pointer;
+      transition: transform .06s ease, background .06s ease, box-shadow .06s ease;
+    }
+    .lane-btn:nth-child(1) { color: var(--cyan); }
+    .lane-btn:nth-child(2) { color: var(--pink); }
+    .lane-btn:nth-child(3) { color: var(--violet); }
+    .lane-btn:nth-child(4) { color: var(--lime); }
+    .lane-btn.pressed {
+      transform: translateY(2px) scale(.96);
+      background: rgba(255,255,255,.17);
+      box-shadow: inset 0 0 20px rgba(255,255,255,.12);
+    }
+
+    .overlay {
+      position: absolute;
+      z-index: 50;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(5,8,18,.76);
+      backdrop-filter: blur(8px);
+    }
+    .overlay.hidden { display: none; }
+
+    .overlay-card {
+      width: min(100%, 390px);
+      padding: 24px 20px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 20px;
+      background: rgba(18,24,45,.94);
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,.4);
+    }
+    .overlay-card h2 { margin: 0; font-size: 29px; }
+    .overlay-card p { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .start-btn {
+      width: 100%;
+      min-height: 52px;
+      margin-top: 8px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #18cde7, #8a6cff 55%, #f35aa8);
+      font-size: 17px;
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(95,94,255,.28);
+    }
+    .start-btn:active { transform: scale(.985); }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 14px 0 0;
+    }
+    .keycap {
+      padding: 7px 4px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .countdown {
+      position: absolute;
+      z-index: 45;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: clamp(72px, 24vw, 130px);
+      font-weight: 1000;
+      pointer-events: none;
+      text-shadow: 0 0 35px var(--cyan);
+    }
+    .countdown.hidden { display: none; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .result-item {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+    }
+    .result-item span { display: block; color: var(--muted); font-size: 10px; }
+    .result-item strong { display: block; margin-top: 2px; font-size: 20px; }
+
+    .grade {
+      margin: 4px 0 8px;
+      font-size: 76px;
+      font-weight: 1000;
+      line-height: .95;
+      background: linear-gradient(135deg, var(--cyan), #fff, var(--pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .footer-note {
+      margin: 10px auto 0;
+      width: min(100%, 560px);
+      color: #7f879f;
+      font-size: 10px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 620px) {
+      .app { padding-left: 7px; padding-right: 7px; }
+      .topbar { align-items: flex-start; }
+      .sub { display: none; }
+      .controls { max-width: 46%; }
+      select, .small-btn { min-height: 32px; padding: 5px 8px; font-size: 11px; }
+      .hud { gap: 5px; }
+      .hud-card { padding: 7px; border-radius: 10px; }
+      .game-shell { height: min(75dvh, 720px); border-radius: 14px; }
+    }
+  </style>
 </head>
 <body>
-  <main class="page">
-    <header class="hero">
+  <main class="app">
+    <header class="topbar">
       <div>
-        <p class="eyebrow">PROJECT SEKAI EN · TEAM BUILDER V0.2</p>
-        <h1>活动配队器 🎧</h1>
-        <p class="hero-copy">先选 EN 活动，再录入你自己的卡。普通活动会按活动数据自动匹配角色/属性加成；账号额外综合力和卡库只保存在你的浏览器里。</p>
+        <p class="brand-small">ORIGINAL WEB RHYTHM GAME</p>
+        <h1>NEON BEAT</h1>
+        <p class="sub">四轨下落式节奏小游戏 · 手机点轨道 / 键盘 D F J K</p>
       </div>
-      <div id="dataStatus" class="status-pill">准备读取 EN 活动数据…</div>
+      <div class="controls">
+        <select id="difficulty" aria-label="难度">
+          <option value="easy">EASY</option>
+          <option value="normal" selected>NORMAL</option>
+          <option value="hard">HARD</option>
+        </select>
+        <button id="soundBtn" class="small-btn" type="button">🔊 声音</button>
+        <button id="pauseBtn" class="small-btn" type="button" disabled>⏸ 暂停</button>
+      </div>
     </header>
 
-    <div class="layout">
-      <div class="stack">
-        <section class="panel">
-          <div class="panel-title-row">
-            <h2>① 选择活动</h2>
-            <button id="refreshData" class="btn btn-secondary btn-small" type="button">刷新 EN 数据</button>
-          </div>
-          <div class="field">
-            <label for="eventSelect">活动</label>
-            <select id="eventSelect">
-              <option value="manual">手动模式（单张卡自己填加成）</option>
-            </select>
-          </div>
-          <div id="eventInfo" class="event-box"></div>
-          <div id="eventError" class="error"></div>
-          <div id="specialNotice" class="notice hidden">检测到 World / Bloom 类特殊活动。当前版本会读取基础活动加成规则，但 Support Group、特殊 Mastery / Rarity / Skill 等机制还没有完整实现；这类卡可以使用“手动加成覆盖 %”修正。</div>
-        </section>
+    <section class="hud" aria-label="游戏状态">
+      <div class="hud-card"><div class="hud-label">Score</div><div id="score" class="hud-value">0</div></div>
+      <div class="hud-card"><div class="hud-label">Combo</div><div id="combo" class="hud-value">0</div></div>
+      <div class="hud-card"><div class="hud-label">Accuracy</div><div id="accuracy" class="hud-value">100%</div></div>
+      <div class="hud-card"><div class="hud-label">Time</div><div id="time" class="hud-value">--</div></div>
+    </section>
 
-        <section class="panel">
-          <div class="panel-title-row">
-            <h2>② 账号额外综合力</h2>
-            <span class="small">对应游戏 Total 详情里的额外项</span>
-          </div>
-          <div class="grid-5">
-            <div class="field">
-              <label for="decorationBonus">Decoration Bonus</label>
-              <input id="decorationBonus" type="number" min="0" inputmode="numeric" placeholder="91682">
-            </div>
-            <div class="field">
-              <label for="characterRankBonus">Character Rank Bonus</label>
-              <input id="characterRankBonus" type="number" min="0" inputmode="numeric" placeholder="8491">
-            </div>
-            <div class="field">
-              <label for="titleBonus">Title Bonus</label>
-              <input id="titleBonus" type="number" min="0" inputmode="numeric" placeholder="230">
-            </div>
-            <div class="field">
-              <label for="furnitureBonus">Furniture Bonus</label>
-              <input id="furnitureBonus" type="number" min="0" inputmode="numeric" placeholder="1072">
-            </div>
-            <div class="field">
-              <label for="gateBonus">Gate Bonus</label>
-              <input id="gateBonus" type="number" min="0" inputmode="numeric" placeholder="6113">
-            </div>
-          </div>
-          <div class="account-total">
-            <div class="small">额外综合力合计</div>
-            <strong id="accountBonusTotal">0</strong>
-          </div>
-          <p class="hint">注意：Decoration / Furniture / Gate 等数值可能随队伍组成改变。这里先按你游戏 Total 详情里看到的数值做估算，之后再升级成设施等级自动计算。</p>
-        </section>
+    <div class="life-wrap"><div id="lifeBar" class="life-bar"></div></div>
 
-        <section class="panel">
-          <div class="panel-title-row">
-            <h2>③ 我的卡库</h2>
-            <span id="cardCount" class="small">0 张</span>
-          </div>
-
-          <form id="cardForm" class="card-form">
-            <div class="grid-2">
-              <div class="field">
-                <label for="cardName">卡名（可不填）</label>
-                <input id="cardName" type="text" maxlength="80" placeholder="例如：彰人某张限定">
-              </div>
-              <div class="field">
-                <label for="cardUnit">角色 / 所属</label>
-                <select id="cardUnit"><option value="">选择角色 / 所属</option></select>
-              </div>
-            </div>
-
-            <div class="grid-3" style="margin-top:10px">
-              <div class="field">
-                <label for="cardAttr">属性</label>
-                <select id="cardAttr">
-                  <option value="">选择属性</option>
-                  <option value="cool">Cool</option>
-                  <option value="cute">Cute</option>
-                  <option value="happy">Happy</option>
-                  <option value="mysterious">Mysterious</option>
-                  <option value="pure">Pure</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="cardTalent">卡片 Talent</label>
-                <input id="cardTalent" type="number" min="1" inputmode="numeric" placeholder="例如 36000">
-              </div>
-              <div class="field">
-                <label for="cardRarity">稀有度</label>
-                <select id="cardRarity">
-                  <option value="4★">4★</option>
-                  <option value="Birthday">Birthday</option>
-                  <option value="3★">3★</option>
-                  <option value="2★">2★</option>
-                  <option value="1★">1★</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid-3" style="margin-top:10px">
-              <div class="field">
-                <label for="cardMasterRank">Master Rank</label>
-                <select id="cardMasterRank">
-                  <option value="0">MR 0</option><option value="1">MR 1</option><option value="2">MR 2</option>
-                  <option value="3">MR 3</option><option value="4">MR 4</option><option value="5">MR 5</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="cardSkillLevel">Skill Level</label>
-                <select id="cardSkillLevel">
-                  <option value="1">Lv.1</option><option value="2">Lv.2</option><option value="3">Lv.3</option><option value="4">Lv.4</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="cardBonusOverride">手动加成覆盖 %（可空）</label>
-                <input id="cardBonusOverride" type="number" min="0" step="0.1" inputmode="decimal" placeholder="特殊活动才用">
-              </div>
-            </div>
-
-            <div id="cardError" class="error"></div>
-            <div class="actions">
-              <button class="btn btn-primary" type="submit">＋ 加入卡库</button>
-              <button id="exportButton" class="btn btn-secondary" type="button">导出备份</button>
-              <button id="importButton" class="btn btn-secondary" type="button">导入备份</button>
-              <button id="clearButton" class="btn btn-danger" type="button">清空本机数据</button>
-              <input id="importFile" class="hidden" type="file" accept="application/json,.json">
-            </div>
-            <div id="importStatus" class="small" style="margin-top:7px"></div>
-          </form>
-
-          <div id="libraryList" class="library-list"></div>
-        </section>
+    <section id="gameShell" class="game-shell" aria-label="四轨节奏游戏区域">
+      <div class="lanes">
+        <div class="lane" data-lane="0"></div>
+        <div class="lane" data-lane="1"></div>
+        <div class="lane" data-lane="2"></div>
+        <div class="lane" data-lane="3"></div>
       </div>
 
-      <aside class="stack">
-        <section class="panel">
-          <h2>④ 自动推荐 5 人队</h2>
-          <p class="hint">同一角色不会重复。普通活动会读取角色 / 属性 bonus；“平衡”只是排序启发式，不等于游戏官方活动点公式。</p>
-          <div class="strategy-row" style="margin-top:12px">
-            <div class="field">
-              <label for="strategySelect">推荐策略</label>
-              <select id="strategySelect">
-                <option value="balanced">平衡：Talent × (1 + Bonus)</option>
-                <option value="bonus">活动加成优先</option>
-                <option value="talent">Talent 优先</option>
-              </select>
-            </div>
-            <button id="recommendButton" class="btn btn-primary" type="button">自动推荐</button>
+      <div class="hit-line"></div>
+      <div id="judge" class="judge">PERFECT</div>
+      <div id="countdown" class="countdown hidden">3</div>
+
+      <div class="lane-buttons">
+        <button class="lane-btn" data-lane="0" type="button">D</button>
+        <button class="lane-btn" data-lane="1" type="button">F</button>
+        <button class="lane-btn" data-lane="2" type="button">J</button>
+        <button class="lane-btn" data-lane="3" type="button">K</button>
+      </div>
+
+      <div id="startOverlay" class="overlay">
+        <div class="overlay-card">
+          <h2>NEON BEAT</h2>
+          <p>音符落到白色判定线时，点下面对应的轨道。越接近判定线，判定越高。</p>
+          <div class="keys">
+            <div class="keycap">D / 左</div>
+            <div class="keycap">F / 下</div>
+            <div class="keycap">J / 上</div>
+            <div class="keycap">K / 右</div>
           </div>
+          <button id="startBtn" class="start-btn" type="button">开始游戏</button>
+        </div>
+      </div>
 
-          <div id="recommendWarning" class="error"></div>
-          <div id="results" class="results"></div>
+      <div id="pauseOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <h2>PAUSED</h2>
+          <p>游戏暂停了。</p>
+          <button id="resumeBtn" class="start-btn" type="button">继续</button>
+        </div>
+      </div>
 
-          <div class="summary-grid">
-            <div class="summary-box">
-              <div class="summary-label">5 人 Talent</div>
-              <div id="sumTalent" class="summary-value cyan">0</div>
-            </div>
-            <div class="summary-box">
-              <div class="summary-label">估算 Total</div>
-              <div id="sumTotal" class="summary-value">0</div>
-            </div>
-            <div class="summary-box">
-              <div class="summary-label">活动加成合计</div>
-              <div id="sumBonus" class="summary-value pink">0%</div>
-            </div>
+      <div id="resultOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <div id="grade" class="grade">S</div>
+          <h2>RESULT</h2>
+          <div class="result-grid">
+            <div class="result-item"><span>SCORE</span><strong id="resultScore">0</strong></div>
+            <div class="result-item"><span>MAX COMBO</span><strong id="resultCombo">0</strong></div>
+            <div class="result-item"><span>ACCURACY</span><strong id="resultAccuracy">0%</strong></div>
+            <div class="result-item"><span>MISS</span><strong id="resultMiss">0</strong></div>
           </div>
+          <button id="retryBtn" class="start-btn" type="button">再来一局</button>
+        </div>
+      </div>
+    </section>
 
-          <div class="notice">“估算 Total” = 推荐队伍卡片 Talent 合计 + 你上面手填的 Decoration / Character Rank / Title / Furniture / Gate。因为其中部分项目会随队伍变化，所以它现在是估算值，不是假装成精确值。</div>
-        </section>
-
-        <section class="panel">
-          <h3>现在这版已经做了什么？</h3>
-          <p class="hint">活动规则和你的账号数据已经分开；卡的活动加成不再是固定属性。EN 活动和 eventDeckBonuses 从公开 master data 读取，本机卡库不上传到 GitHub。</p>
-          <p class="hint">下一步：直接接卡牌 master data，让你不用手填角色/属性/稀有度，并把设施等级、World Link Support Group 和更准确的综合力公式补进去。</p>
-        </section>
-      </aside>
-    </div>
-
-    <footer>
-      非官方 Project Sekai / HATSUNE MIKU: COLORFUL STAGE! 工具。活动数据来源为社区维护的 Sekai-World EN master data；如数据源暂时不可用，可切到手动模式继续使用。
-    </footer>
+    <p class="footer-note">这是原创网页小游戏，不使用 Project Sekai 的歌曲、谱面或美术资源。旧配队器数据会在第一次打开这版时从浏览器本地清掉。</p>
   </main>
 
-  <script src="./app.js" defer></script>
-  <script src="./user-cards.js" defer></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = id => document.getElementById(id);
+      const lanes = [...document.querySelectorAll(".lane")];
+      const laneButtons = [...document.querySelectorAll(".lane-btn")];
+      const difficultySelect = $("difficulty");
+      const soundBtn = $("soundBtn");
+      const pauseBtn = $("pauseBtn");
+      const startBtn = $("startBtn");
+      const resumeBtn = $("resumeBtn");
+      const retryBtn = $("retryBtn");
+      const gameShell = $("gameShell");
+      const judgeEl = $("judge");
+      const countdownEl = $("countdown");
+
+      // 清掉旧配队器留下的本机数据。
+      try {
+        localStorage.removeItem("pjsk-en-builder-v2");
+        localStorage.removeItem("pjsk-en-screenshot-cards-imported-v1");
+      } catch (_) {}
+
+      const DIFFICULTIES = {
+        easy:   { bpm: 112, duration: 34, density: 1.0, lead: 2100 },
+        normal: { bpm: 146, duration: 40, density: 1.5, lead: 1850 },
+        hard:   { bpm: 178, duration: 44, density: 2.1, lead: 1650 }
+      };
+
+      const state = {
+        running: false,
+        paused: false,
+        sound: true,
+        notes: [],
+        startPerf: 0,
+        pausePerf: 0,
+        pauseAccum: 0,
+        raf: 0,
+        score: 0,
+        combo: 0,
+        maxCombo: 0,
+        life: 100,
+        perfect: 0,
+        great: 0,
+        good: 0,
+        miss: 0,
+        judged: 0,
+        timingSum: 0,
+        durationMs: 0,
+        leadMs: 1800,
+        nextBeat: 0,
+        audioCtx: null,
+        finishTimer: null
+      };
+
+      function getAudio() {
+        if (!state.sound) return null;
+        if (!state.audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          state.audioCtx = new AC();
+        }
+        if (state.audioCtx.state === "suspended") state.audioCtx.resume();
+        return state.audioCtx;
+      }
+
+      function tone(freq, duration = .045, gainValue = .045, type = "sine") {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(gainValue, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + duration);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      }
+
+      function currentSongTime(perf = performance.now()) {
+        return perf - state.startPerf - state.pauseAccum;
+      }
+
+      function seededRandom(seed) {
+        let t = seed >>> 0;
+        return () => {
+          t += 0x6D2B79F5;
+          let x = t;
+          x = Math.imul(x ^ (x >>> 15), x | 1);
+          x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+          return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function addNote(chart, time, lane) {
+        chart.push({
+          id: chart.length,
+          time,
+          lane,
+          judged: false,
+          result: null,
+          el: null
+        });
+      }
+
+      function makeChart(mode) {
+        const cfg = DIFFICULTIES[mode];
+        const beat = 60000 / cfg.bpm;
+        const chart = [];
+        const rand = seededRandom(mode === "easy" ? 17 : mode === "normal" ? 47 : 91);
+        const end = cfg.duration * 1000 - 1200;
+        let previousLane = -1;
+
+        for (let t = 2200, i = 0; t < end; i++) {
+          let lane = Math.floor(rand() * 4);
+          if (lane === previousLane && rand() < .65) lane = (lane + 1 + Math.floor(rand() * 3)) % 4;
+          previousLane = lane;
+          addNote(chart, t, lane);
+
+          if (mode !== "easy" && i % 8 === 6) {
+            const other = (lane + 2 + Math.floor(rand() * 2)) % 4;
+            addNote(chart, t, other);
+          }
+
+          if (mode === "hard" && (i % 7 === 3 || i % 11 === 8)) {
+            const sub = (lane + (rand() < .5 ? 1 : 3)) % 4;
+            addNote(chart, t + beat / 2, sub);
+          }
+
+          const step = mode === "easy"
+            ? beat * (rand() < .18 ? 1.5 : 1)
+            : mode === "normal"
+              ? beat * (rand() < .32 ? .5 : 1)
+              : beat * (rand() < .48 ? .5 : 1);
+          t += step;
+        }
+
+        chart.sort((a,b) => a.time - b.time || a.lane - b.lane);
+        return { chart, durationMs: cfg.duration * 1000, leadMs: cfg.lead, bpm: cfg.bpm };
+      }
+
+      function resetVisualNotes() {
+        document.querySelectorAll(".note").forEach(el => el.remove());
+        lanes.forEach(lane => lane.classList.remove("active"));
+      }
+
+      function resetStats() {
+        state.score = 0;
+        state.combo = 0;
+        state.maxCombo = 0;
+        state.life = 100;
+        state.perfect = 0;
+        state.great = 0;
+        state.good = 0;
+        state.miss = 0;
+        state.judged = 0;
+        state.timingSum = 0;
+        state.nextBeat = 0;
+        updateHud(0);
+      }
+
+      function updateHud(songTime) {
+        $("score").textContent = Math.round(state.score).toLocaleString();
+        $("combo").textContent = state.combo;
+        const total = state.perfect + state.great + state.good + state.miss;
+        const acc = total ? ((state.perfect + state.great * .8 + state.good * .5) / total * 100) : 100;
+        $("accuracy").textContent = `${acc.toFixed(1)}%`;
+        $("time").textContent = `${Math.max(0, (state.durationMs - songTime) / 1000).toFixed(1)}s`;
+        $("lifeBar").style.width = `${Math.max(0, state.life)}%`;
+      }
+
+      function showJudge(text, cls) {
+        judgeEl.textContent = text;
+        judgeEl.className = `judge ${cls}`;
+        void judgeEl.offsetWidth;
+        judgeEl.classList.add("show");
+      }
+
+      function pressFlash(lane) {
+        const btn = laneButtons[lane];
+        const laneEl = lanes[lane];
+        btn.classList.add("pressed");
+        laneEl.classList.add("active");
+        clearTimeout(btn._flashTimer);
+        btn._flashTimer = setTimeout(() => {
+          btn.classList.remove("pressed");
+          laneEl.classList.remove("active");
+        }, 90);
+      }
+
+      function createNoteEl(note) {
+        const el = document.createElement("div");
+        el.className = `note l${note.lane}`;
+        el.dataset.id = note.id;
+        lanes[note.lane].appendChild(el);
+        note.el = el;
+        return el;
+      }
+
+      function removeNoteEl(note) {
+        if (note.el) {
+          note.el.remove();
+          note.el = null;
+        }
+      }
+
+      function applyJudgement(note, absDelta) {
+        let result;
+        let points;
+        let cls;
+        if (absDelta <= 72) {
+          result = "PERFECT"; points = 1000; cls = "perfect"; state.perfect++;
+        } else if (absDelta <= 125) {
+          result = "GREAT"; points = 820; cls = "great"; state.great++;
+        } else {
+          result = "GOOD"; points = 520; cls = "good"; state.good++;
+        }
+
+        note.judged = true;
+        note.result = result;
+        state.judged++;
+        state.combo++;
+        state.maxCombo = Math.max(state.maxCombo, state.combo);
+        state.timingSum += absDelta;
+        state.score += points * (1 + Math.min(state.combo, 100) * .0025);
+        state.life = Math.min(100, state.life + (result === "PERFECT" ? .7 : result === "GREAT" ? .35 : .1));
+        removeNoteEl(note);
+        showJudge(result, cls);
+        tone(result === "PERFECT" ? 880 : result === "GREAT" ? 740 : 620, .045, .045, "triangle");
+      }
+
+      function applyMiss(note) {
+        if (note.judged) return;
+        note.judged = true;
+        note.result = "MISS";
+        state.judged++;
+        state.miss++;
+        state.combo = 0;
+        state.life = Math.max(0, state.life - 7);
+        removeNoteEl(note);
+        showJudge("MISS", "miss");
+      }
+
+      function hitLane(lane) {
+        if (!state.running || state.paused) return;
+        pressFlash(lane);
+        const now = currentSongTime();
+        let candidate = null;
+        let best = Infinity;
+
+        for (const note of state.notes) {
+          if (note.judged || note.lane !== lane) continue;
+          const delta = Math.abs(note.time - now);
+          if (delta < best) {
+            best = delta;
+            candidate = note;
+          }
+          if (note.time - now > 300) break;
+        }
+
+        if (candidate && best <= 220) {
+          applyJudgement(candidate, best);
+        } else {
+          tone([300,360,420,480][lane], .025, .018, "square");
+        }
+      }
+
+      function renderFrame(perf) {
+        if (!state.running) return;
+        if (state.paused) {
+          state.raf = requestAnimationFrame(renderFrame);
+          return;
+        }
+
+        const t = currentSongTime(perf);
+        const shellHeight = gameShell.clientHeight;
+        const hitY = shellHeight - 94;
+        const topY = -18;
+        const travel = hitY - topY;
+
+        for (const note of state.notes) {
+          if (note.judged) continue;
+          const spawnAt = note.time - state.leadMs;
+          if (t >= spawnAt && t <= note.time + 250) {
+            const progress = (t - spawnAt) / state.leadMs;
+            const y = topY + progress * travel;
+            const el = note.el || createNoteEl(note);
+            el.style.top = `${y}px`;
+          }
+          if (t > note.time + 225) applyMiss(note);
+        }
+
+        const cfg = DIFFICULTIES[difficultySelect.value];
+        const beatMs = 60000 / cfg.bpm;
+        while (t >= state.nextBeat * beatMs) {
+          if (state.nextBeat >= 1) tone(state.nextBeat % 4 === 0 ? 125 : 95, .055, .018, "sine");
+          state.nextBeat++;
+        }
+
+        updateHud(t);
+
+        if (t >= state.durationMs + 500 || state.life <= 0) {
+          finishGame();
+          return;
+        }
+
+        state.raf = requestAnimationFrame(renderFrame);
+      }
+
+      async function countdown() {
+        countdownEl.classList.remove("hidden");
+        for (const value of [3,2,1]) {
+          countdownEl.textContent = value;
+          tone(520 + (3-value) * 90, .08, .055, "triangle");
+          await new Promise(resolve => setTimeout(resolve, 650));
+        }
+        countdownEl.textContent = "GO!";
+        tone(900, .12, .07, "triangle");
+        await new Promise(resolve => setTimeout(resolve, 360));
+        countdownEl.classList.add("hidden");
+      }
+
+      async function startGame() {
+        if (state.running) return;
+        getAudio();
+        $("resultOverlay").classList.add("hidden");
+        $("startOverlay").classList.add("hidden");
+        $("pauseOverlay").classList.add("hidden");
+        resetVisualNotes();
+        resetStats();
+
+        const generated = makeChart(difficultySelect.value);
+        state.notes = generated.chart;
+        state.durationMs = generated.durationMs;
+        state.leadMs = generated.leadMs;
+        state.pauseAccum = 0;
+        state.paused = false;
+        state.running = false;
+        pauseBtn.disabled = true;
+        difficultySelect.disabled = true;
+
+        await countdown();
+
+        state.startPerf = performance.now();
+        state.running = true;
+        pauseBtn.disabled = false;
+        state.raf = requestAnimationFrame(renderFrame);
+      }
+
+      function pauseGame() {
+        if (!state.running || state.paused) return;
+        state.paused = true;
+        state.pausePerf = performance.now();
+        $("pauseOverlay").classList.remove("hidden");
+        pauseBtn.textContent = "▶ 继续";
+      }
+
+      function resumeGame() {
+        if (!state.running || !state.paused) return;
+        state.pauseAccum += performance.now() - state.pausePerf;
+        state.paused = false;
+        $("pauseOverlay").classList.add("hidden");
+        pauseBtn.textContent = "⏸ 暂停";
+      }
+
+      function finishGame() {
+        if (!state.running) return;
+        state.running = false;
+        state.paused = false;
+        cancelAnimationFrame(state.raf);
+        pauseBtn.disabled = true;
+        pauseBtn.textContent = "⏸ 暂停";
+        difficultySelect.disabled = false;
+
+        for (const note of state.notes) {
+          if (!note.judged) applyMiss(note);
+          removeNoteEl(note);
+        }
+
+        const total = state.perfect + state.great + state.good + state.miss;
+        const acc = total ? ((state.perfect + state.great * .8 + state.good * .5) / total * 100) : 0;
+        const grade = acc >= 98 && state.miss === 0 ? "S+" : acc >= 94 ? "S" : acc >= 86 ? "A" : acc >= 74 ? "B" : "C";
+
+        $("grade").textContent = grade;
+        $("resultScore").textContent = Math.round(state.score).toLocaleString();
+        $("resultCombo").textContent = state.maxCombo;
+        $("resultAccuracy").textContent = `${acc.toFixed(2)}%`;
+        $("resultMiss").textContent = state.miss;
+        $("resultOverlay").classList.remove("hidden");
+        updateHud(state.durationMs);
+      }
+
+      soundBtn.addEventListener("click", () => {
+        state.sound = !state.sound;
+        soundBtn.textContent = state.sound ? "🔊 声音" : "🔇 静音";
+        if (state.sound) getAudio();
+      });
+
+      pauseBtn.addEventListener("click", () => state.paused ? resumeGame() : pauseGame());
+      startBtn.addEventListener("click", startGame);
+      resumeBtn.addEventListener("click", resumeGame);
+      retryBtn.addEventListener("click", startGame);
+
+      laneButtons.forEach(btn => {
+        const lane = Number(btn.dataset.lane);
+        btn.addEventListener("pointerdown", event => {
+          event.preventDefault();
+          hitLane(lane);
+        });
+      });
+
+      const keyMap = {
+        KeyD: 0, ArrowLeft: 0,
+        KeyF: 1, ArrowDown: 1,
+        KeyJ: 2, ArrowUp: 2,
+        KeyK: 3, ArrowRight: 3
+      };
+
+      window.addEventListener("keydown", event => {
+        if (event.repeat) return;
+        if (event.code in keyMap) {
+          event.preventDefault();
+          hitLane(keyMap[event.code]);
+        } else if (event.code === "Escape" && state.running) {
+          state.paused ? resumeGame() : pauseGame();
+        } else if (event.code === "Space" && !state.running) {
+          event.preventDefault();
+          startGame();
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && state.running && !state.paused) pauseGame();
+      });
+
+      updateHud(0);
+    })();
+  </script>
 </body>
 </html>
