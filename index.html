@@ -3,388 +3,205 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#13b8c4">
+  <meta name="theme-color" content="#1cc7d0">
+  <meta name="description" content="Project Sekai EN 活动配队器：活动规则、账号加成、个人卡库与自动推荐。">
   <title>Project Sekai EN 配队器</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg: #f4f8fb;
-      --panel: rgba(255, 255, 255, 0.92);
-      --text: #15202b;
-      --muted: #6d7b88;
-      --line: #dce6ec;
-      --accent: #13b8c4;
-      --accent-2: #ff6f91;
-      --shadow: 0 12px 30px rgba(30, 80, 100, 0.10);
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 10% 0%, rgba(19, 184, 196, 0.18), transparent 30%),
-        radial-gradient(circle at 100% 10%, rgba(255, 111, 145, 0.16), transparent 28%),
-        var(--bg);
-    }
-
-    .page {
-      width: min(1120px, calc(100% - 28px));
-      margin: 0 auto;
-      padding: 34px 0 50px;
-    }
-
-    .hero {
-      margin-bottom: 22px;
-    }
-
-    .eyebrow {
-      margin: 0 0 6px;
-      color: var(--accent);
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(30px, 6vw, 48px);
-      line-height: 1.08;
-    }
-
-    .subtitle {
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 22px 0;
-    }
-
-    .summary-card {
-      padding: 18px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-    }
-
-    .summary-label {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .summary-value {
-      margin-top: 4px;
-      font-size: clamp(25px, 5vw, 34px);
-      font-weight: 900;
-    }
-
-    .summary-value.accent {
-      color: var(--accent);
-    }
-
-    .summary-value.pink {
-      color: var(--accent-2);
-    }
-
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .slot {
-      padding: 16px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
-    }
-
-    .slot-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 34px;
-      height: 34px;
-      margin-bottom: 13px;
-      border-radius: 11px;
-      color: white;
-      background: linear-gradient(135deg, var(--accent), #67d8df);
-      font-weight: 900;
-    }
-
-    .field {
-      margin-bottom: 12px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    select,
-    input {
-      width: 100%;
-      min-height: 42px;
-      padding: 9px 10px;
-      border: 1px solid #cad8df;
-      border-radius: 11px;
-      outline: none;
-      background: white;
-      color: var(--text);
-      font: inherit;
-    }
-
-    select:focus,
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(19, 184, 196, 0.13);
-    }
-
-    .leader-badge {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 3px 7px;
-      border-radius: 999px;
-      color: #9f3f5c;
-      background: #ffe3eb;
-      font-size: 10px;
-      font-weight: 900;
-      vertical-align: middle;
-    }
-
-    .warning {
-      min-height: 22px;
-      margin: 15px 0 0;
-      color: #c33d5b;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    button {
-      min-height: 44px;
-      padding: 10px 16px;
-      border: 0;
-      border-radius: 12px;
-      cursor: pointer;
-      font: inherit;
-      font-weight: 800;
-    }
-
-    .primary {
-      color: white;
-      background: linear-gradient(135deg, var(--accent), #16cad7);
-    }
-
-    .secondary {
-      color: var(--text);
-      background: white;
-      border: 1px solid var(--line);
-    }
-
-    .note {
-      margin-top: 18px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      color: var(--muted);
-      background: rgba(255, 255, 255, 0.66);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    @media (max-width: 920px) {
-      .team-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 620px) {
-      .page {
-        width: min(100% - 18px, 1120px);
-        padding-top: 22px;
-      }
-
-      .summary {
-        grid-template-columns: 1fr;
-      }
-
-      .team-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main class="page">
     <header class="hero">
-      <p class="eyebrow">Project Sekai EN</p>
-      <h1>配队器 <span aria-hidden="true">🎧</span></h1>
-      <p class="subtitle">第一版：先手动录入 5 张卡，自动统计队伍综合力和活动加成。</p>
+      <div>
+        <p class="eyebrow">PROJECT SEKAI EN · TEAM BUILDER V0.2</p>
+        <h1>活动配队器 🎧</h1>
+        <p class="hero-copy">先选 EN 活动，再录入你自己的卡。普通活动会按活动数据自动匹配角色/属性加成；账号额外综合力和卡库只保存在你的浏览器里。</p>
+      </div>
+      <div id="dataStatus" class="status-pill">准备读取 EN 活动数据…</div>
     </header>
 
-    <section class="summary" aria-label="队伍统计">
-      <div class="summary-card">
-        <div class="summary-label">已选择成员</div>
-        <div class="summary-value" id="memberCount">0 / 5</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">队伍总综合力</div>
-        <div class="summary-value accent" id="totalPower">0</div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">活动加成合计</div>
-        <div class="summary-value pink" id="totalBonus">0%</div>
-      </div>
-    </section>
+    <div class="layout">
+      <div class="stack">
+        <section class="panel">
+          <div class="panel-title-row">
+            <h2>① 选择活动</h2>
+            <button id="refreshData" class="btn btn-secondary btn-small" type="button">刷新 EN 数据</button>
+          </div>
+          <div class="field">
+            <label for="eventSelect">活动</label>
+            <select id="eventSelect">
+              <option value="manual">手动模式（单张卡自己填加成）</option>
+            </select>
+          </div>
+          <div id="eventInfo" class="event-box"></div>
+          <div id="eventError" class="error"></div>
+          <div id="specialNotice" class="notice hidden">检测到 World / Bloom 类特殊活动。当前版本会读取基础活动加成规则，但 Support Group、特殊 Mastery / Rarity / Skill 等机制还没有完整实现；这类卡可以使用“手动加成覆盖 %”修正。</div>
+        </section>
 
-    <section class="team-grid" id="teamGrid" aria-label="队伍卡槽"></section>
+        <section class="panel">
+          <div class="panel-title-row">
+            <h2>② 账号额外综合力</h2>
+            <span class="small">对应游戏 Total 详情里的额外项</span>
+          </div>
+          <div class="grid-5">
+            <div class="field">
+              <label for="decorationBonus">Decoration Bonus</label>
+              <input id="decorationBonus" type="number" min="0" inputmode="numeric" placeholder="91682">
+            </div>
+            <div class="field">
+              <label for="characterRankBonus">Character Rank Bonus</label>
+              <input id="characterRankBonus" type="number" min="0" inputmode="numeric" placeholder="8491">
+            </div>
+            <div class="field">
+              <label for="titleBonus">Title Bonus</label>
+              <input id="titleBonus" type="number" min="0" inputmode="numeric" placeholder="230">
+            </div>
+            <div class="field">
+              <label for="furnitureBonus">Furniture Bonus</label>
+              <input id="furnitureBonus" type="number" min="0" inputmode="numeric" placeholder="1072">
+            </div>
+            <div class="field">
+              <label for="gateBonus">Gate Bonus</label>
+              <input id="gateBonus" type="number" min="0" inputmode="numeric" placeholder="6113">
+            </div>
+          </div>
+          <div class="account-total">
+            <div class="small">额外综合力合计</div>
+            <strong id="accountBonusTotal">0</strong>
+          </div>
+          <p class="hint">注意：Decoration / Furniture / Gate 等数值可能随队伍组成改变。这里先按你游戏 Total 详情里看到的数值做估算，之后再升级成设施等级自动计算。</p>
+        </section>
 
-    <p class="warning" id="warning" role="status"></p>
+        <section class="panel">
+          <div class="panel-title-row">
+            <h2>③ 我的卡库</h2>
+            <span id="cardCount" class="small">0 张</span>
+          </div>
 
-    <div class="actions">
-      <button class="primary" id="saveButton" type="button">保存到本机</button>
-      <button class="secondary" id="resetButton" type="button">清空队伍</button>
+          <form id="cardForm" class="card-form">
+            <div class="grid-2">
+              <div class="field">
+                <label for="cardName">卡名（可不填）</label>
+                <input id="cardName" type="text" maxlength="80" placeholder="例如：彰人某张限定">
+              </div>
+              <div class="field">
+                <label for="cardUnit">角色 / 所属</label>
+                <select id="cardUnit"><option value="">选择角色 / 所属</option></select>
+              </div>
+            </div>
+
+            <div class="grid-3" style="margin-top:10px">
+              <div class="field">
+                <label for="cardAttr">属性</label>
+                <select id="cardAttr">
+                  <option value="">选择属性</option>
+                  <option value="cool">Cool</option>
+                  <option value="cute">Cute</option>
+                  <option value="happy">Happy</option>
+                  <option value="mysterious">Mysterious</option>
+                  <option value="pure">Pure</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="cardTalent">卡片 Talent</label>
+                <input id="cardTalent" type="number" min="1" inputmode="numeric" placeholder="例如 36000">
+              </div>
+              <div class="field">
+                <label for="cardRarity">稀有度</label>
+                <select id="cardRarity">
+                  <option value="4★">4★</option>
+                  <option value="Birthday">Birthday</option>
+                  <option value="3★">3★</option>
+                  <option value="2★">2★</option>
+                  <option value="1★">1★</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-3" style="margin-top:10px">
+              <div class="field">
+                <label for="cardMasterRank">Master Rank</label>
+                <select id="cardMasterRank">
+                  <option value="0">MR 0</option><option value="1">MR 1</option><option value="2">MR 2</option>
+                  <option value="3">MR 3</option><option value="4">MR 4</option><option value="5">MR 5</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="cardSkillLevel">Skill Level</label>
+                <select id="cardSkillLevel">
+                  <option value="1">Lv.1</option><option value="2">Lv.2</option><option value="3">Lv.3</option><option value="4">Lv.4</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="cardBonusOverride">手动加成覆盖 %（可空）</label>
+                <input id="cardBonusOverride" type="number" min="0" step="0.1" inputmode="decimal" placeholder="特殊活动才用">
+              </div>
+            </div>
+
+            <div id="cardError" class="error"></div>
+            <div class="actions">
+              <button class="btn btn-primary" type="submit">＋ 加入卡库</button>
+              <button id="exportButton" class="btn btn-secondary" type="button">导出备份</button>
+              <button id="importButton" class="btn btn-secondary" type="button">导入备份</button>
+              <button id="clearButton" class="btn btn-danger" type="button">清空本机数据</button>
+              <input id="importFile" class="hidden" type="file" accept="application/json,.json">
+            </div>
+            <div id="importStatus" class="small" style="margin-top:7px"></div>
+          </form>
+
+          <div id="libraryList" class="library-list"></div>
+        </section>
+      </div>
+
+      <aside class="stack">
+        <section class="panel">
+          <h2>④ 自动推荐 5 人队</h2>
+          <p class="hint">同一角色不会重复。普通活动会读取角色 / 属性 bonus；“平衡”只是排序启发式，不等于游戏官方活动点公式。</p>
+          <div class="strategy-row" style="margin-top:12px">
+            <div class="field">
+              <label for="strategySelect">推荐策略</label>
+              <select id="strategySelect">
+                <option value="balanced">平衡：Talent × (1 + Bonus)</option>
+                <option value="bonus">活动加成优先</option>
+                <option value="talent">Talent 优先</option>
+              </select>
+            </div>
+            <button id="recommendButton" class="btn btn-primary" type="button">自动推荐</button>
+          </div>
+
+          <div id="recommendWarning" class="error"></div>
+          <div id="results" class="results"></div>
+
+          <div class="summary-grid">
+            <div class="summary-box">
+              <div class="summary-label">5 人 Talent</div>
+              <div id="sumTalent" class="summary-value cyan">0</div>
+            </div>
+            <div class="summary-box">
+              <div class="summary-label">估算 Total</div>
+              <div id="sumTotal" class="summary-value">0</div>
+            </div>
+            <div class="summary-box">
+              <div class="summary-label">活动加成合计</div>
+              <div id="sumBonus" class="summary-value pink">0%</div>
+            </div>
+          </div>
+
+          <div class="notice">“估算 Total” = 推荐队伍卡片 Talent 合计 + 你上面手填的 Decoration / Character Rank / Title / Furniture / Gate。因为其中部分项目会随队伍变化，所以它现在是估算值，不是假装成精确值。</div>
+        </section>
+
+        <section class="panel">
+          <h3>现在这版已经做了什么？</h3>
+          <p class="hint">活动规则和你的账号数据已经分开；卡的活动加成不再是固定属性。EN 活动和 eventDeckBonuses 从公开 master data 读取，本机卡库不上传到 GitHub。</p>
+          <p class="hint">下一步：直接接卡牌 master data，让你不用手填角色/属性/稀有度，并把设施等级、World Link Support Group 和更准确的综合力公式补进去。</p>
+        </section>
+      </aside>
     </div>
 
-    <div class="note">
-      目前还是手动配队骨架版，还没有接 EN 服真实卡牌数据库。下一版可以继续做：卡牌图片、星级、技能、角色/属性筛选，以及根据活动条件自动推荐队伍。
-    </div>
+    <footer>
+      非官方 Project Sekai / HATSUNE MIKU: COLORFUL STAGE! 工具。活动数据来源为社区维护的 Sekai-World EN master data；如数据源暂时不可用，可切到手动模式继续使用。
+    </footer>
   </main>
 
-  <script>
-    const characters = [
-      "", "Hatsune Miku", "Kagamine Rin", "Kagamine Len", "Megurine Luka", "MEIKO", "KAITO",
-      "Hoshino Ichika", "Tenma Saki", "Mochizuki Honami", "Hinomori Shiho",
-      "Hanasato Minori", "Kiritani Haruka", "Momoi Airi", "Hinomori Shizuku",
-      "Azusawa Kohane", "Shiraishi An", "Shinonome Akito", "Aoyagi Toya",
-      "Tenma Tsukasa", "Otori Emu", "Kusanagi Nene", "Kamishiro Rui",
-      "Yoisaki Kanade", "Asahina Mafuyu", "Shinonome Ena", "Akiyama Mizuki"
-    ];
-
-    const attributes = ["", "Cool", "Cute", "Happy", "Mysterious", "Pure"];
-    const teamGrid = document.getElementById("teamGrid");
-    const memberCount = document.getElementById("memberCount");
-    const totalPower = document.getElementById("totalPower");
-    const totalBonus = document.getElementById("totalBonus");
-    const warning = document.getElementById("warning");
-
-    function optionList(items, emptyLabel) {
-      return items.map((item, index) =>
-        `<option value="${item}">${index === 0 ? emptyLabel : item}</option>`
-      ).join("");
-    }
-
-    for (let i = 0; i < 5; i++) {
-      const slot = document.createElement("article");
-      slot.className = "slot";
-      slot.dataset.slot = i;
-      slot.innerHTML = `
-        <div class="slot-number">${i + 1}</div>${i === 0 ? '<span class="leader-badge">LEADER</span>' : ''}
-        <div class="field">
-          <label for="character-${i}">角色</label>
-          <select id="character-${i}" class="character">${optionList(characters, "选择角色")}</select>
-        </div>
-        <div class="field">
-          <label for="attribute-${i}">属性</label>
-          <select id="attribute-${i}" class="attribute">${optionList(attributes, "选择属性")}</select>
-        </div>
-        <div class="field">
-          <label for="power-${i}">综合力</label>
-          <input id="power-${i}" class="power" type="number" min="0" inputmode="numeric" placeholder="例如 32000">
-        </div>
-        <div class="field">
-          <label for="bonus-${i}">活动加成 %</label>
-          <input id="bonus-${i}" class="bonus" type="number" min="0" step="0.1" inputmode="decimal" placeholder="例如 50">
-        </div>
-      `;
-      teamGrid.appendChild(slot);
-    }
-
-    function getSlots() {
-      return [...document.querySelectorAll(".slot")].map(slot => ({
-        character: slot.querySelector(".character").value,
-        attribute: slot.querySelector(".attribute").value,
-        power: Number(slot.querySelector(".power").value) || 0,
-        bonus: Number(slot.querySelector(".bonus").value) || 0
-      }));
-    }
-
-    function updateSummary() {
-      const slots = getSlots();
-      const selected = slots.filter(slot => slot.character);
-      const power = slots.reduce((sum, slot) => sum + slot.power, 0);
-      const bonus = slots.reduce((sum, slot) => sum + slot.bonus, 0);
-
-      memberCount.textContent = `${selected.length} / 5`;
-      totalPower.textContent = power.toLocaleString();
-      totalBonus.textContent = `${Number(bonus.toFixed(1))}%`;
-
-      const names = selected.map(slot => slot.character);
-      const duplicates = [...new Set(names.filter((name, index) => names.indexOf(name) !== index))];
-      warning.textContent = duplicates.length
-        ? `⚠️ 同一队伍不能重复同一角色：${duplicates.join("、")}`
-        : "";
-    }
-
-    function saveTeam() {
-      localStorage.setItem("pjsk-en-team-v1", JSON.stringify(getSlots()));
-      const oldText = document.getElementById("saveButton").textContent;
-      document.getElementById("saveButton").textContent = "已保存 ✓";
-      setTimeout(() => document.getElementById("saveButton").textContent = oldText, 1200);
-    }
-
-    function loadTeam() {
-      const raw = localStorage.getItem("pjsk-en-team-v1");
-      if (!raw) return;
-
-      try {
-        const saved = JSON.parse(raw);
-        document.querySelectorAll(".slot").forEach((slot, i) => {
-          if (!saved[i]) return;
-          slot.querySelector(".character").value = saved[i].character || "";
-          slot.querySelector(".attribute").value = saved[i].attribute || "";
-          slot.querySelector(".power").value = saved[i].power || "";
-          slot.querySelector(".bonus").value = saved[i].bonus || "";
-        });
-      } catch (error) {
-        console.warn("Saved team could not be loaded.", error);
-      }
-    }
-
-    function resetTeam() {
-      document.querySelectorAll("select, input").forEach(control => control.value = "");
-      localStorage.removeItem("pjsk-en-team-v1");
-      updateSummary();
-    }
-
-    teamGrid.addEventListener("input", updateSummary);
-    teamGrid.addEventListener("change", updateSummary);
-    document.getElementById("saveButton").addEventListener("click", saveTeam);
-    document.getElementById("resetButton").addEventListener("click", resetTeam);
-
-    loadTeam();
-    updateSummary();
-  </script>
+  <script src="./app.js" defer></script>
 </body>
 </html>
