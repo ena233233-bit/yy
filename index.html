@@ -3,16 +3,388 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#13b8c4">
   <title>Project Sekai EN 配队器</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f4f8fb;
+      --panel: rgba(255, 255, 255, 0.92);
+      --text: #15202b;
+      --muted: #6d7b88;
+      --line: #dce6ec;
+      --accent: #13b8c4;
+      --accent-2: #ff6f91;
+      --shadow: 0 12px 30px rgba(30, 80, 100, 0.10);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(19, 184, 196, 0.18), transparent 30%),
+        radial-gradient(circle at 100% 10%, rgba(255, 111, 145, 0.16), transparent 28%),
+        var(--bg);
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 34px 0 50px;
+    }
+
+    .hero {
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 6vw, 48px);
+      line-height: 1.08;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .summary-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .summary-value {
+      margin-top: 4px;
+      font-size: clamp(25px, 5vw, 34px);
+      font-weight: 900;
+    }
+
+    .summary-value.accent {
+      color: var(--accent);
+    }
+
+    .summary-value.pink {
+      color: var(--accent-2);
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .slot {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .slot-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 13px;
+      border-radius: 11px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #67d8df);
+      font-weight: 900;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    select,
+    input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 1px solid #cad8df;
+      border-radius: 11px;
+      outline: none;
+      background: white;
+      color: var(--text);
+      font: inherit;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(19, 184, 196, 0.13);
+    }
+
+    .leader-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      color: #9f3f5c;
+      background: #ffe3eb;
+      font-size: 10px;
+      font-weight: 900;
+      vertical-align: middle;
+    }
+
+    .warning {
+      min-height: 22px;
+      margin: 15px 0 0;
+      color: #c33d5b;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    .primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #16cad7);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: white;
+      border: 1px solid var(--line);
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.66);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 920px) {
+      .team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 18px, 1120px);
+        padding-top: 22px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Project Sekai EN 配队器</h1>
-  <button id="testButton" type="button">测试按钮</button>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Project Sekai EN</p>
+      <h1>配队器 <span aria-hidden="true">🎧</span></h1>
+      <p class="subtitle">第一版：先手动录入 5 张卡，自动统计队伍综合力和活动加成。</p>
+    </header>
+
+    <section class="summary" aria-label="队伍统计">
+      <div class="summary-card">
+        <div class="summary-label">已选择成员</div>
+        <div class="summary-value" id="memberCount">0 / 5</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">队伍总综合力</div>
+        <div class="summary-value accent" id="totalPower">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">活动加成合计</div>
+        <div class="summary-value pink" id="totalBonus">0%</div>
+      </div>
+    </section>
+
+    <section class="team-grid" id="teamGrid" aria-label="队伍卡槽"></section>
+
+    <p class="warning" id="warning" role="status"></p>
+
+    <div class="actions">
+      <button class="primary" id="saveButton" type="button">保存到本机</button>
+      <button class="secondary" id="resetButton" type="button">清空队伍</button>
+    </div>
+
+    <div class="note">
+      目前还是手动配队骨架版，还没有接 EN 服真实卡牌数据库。下一版可以继续做：卡牌图片、星级、技能、角色/属性筛选，以及根据活动条件自动推荐队伍。
+    </div>
+  </main>
 
   <script>
-    document.getElementById('testButton').addEventListener('click', () => {
-      alert('测试成功！');
-    });
+    const characters = [
+      "", "Hatsune Miku", "Kagamine Rin", "Kagamine Len", "Megurine Luka", "MEIKO", "KAITO",
+      "Hoshino Ichika", "Tenma Saki", "Mochizuki Honami", "Hinomori Shiho",
+      "Hanasato Minori", "Kiritani Haruka", "Momoi Airi", "Hinomori Shizuku",
+      "Azusawa Kohane", "Shiraishi An", "Shinonome Akito", "Aoyagi Toya",
+      "Tenma Tsukasa", "Otori Emu", "Kusanagi Nene", "Kamishiro Rui",
+      "Yoisaki Kanade", "Asahina Mafuyu", "Shinonome Ena", "Akiyama Mizuki"
+    ];
+
+    const attributes = ["", "Cool", "Cute", "Happy", "Mysterious", "Pure"];
+    const teamGrid = document.getElementById("teamGrid");
+    const memberCount = document.getElementById("memberCount");
+    const totalPower = document.getElementById("totalPower");
+    const totalBonus = document.getElementById("totalBonus");
+    const warning = document.getElementById("warning");
+
+    function optionList(items, emptyLabel) {
+      return items.map((item, index) =>
+        `<option value="${item}">${index === 0 ? emptyLabel : item}</option>`
+      ).join("");
+    }
+
+    for (let i = 0; i < 5; i++) {
+      const slot = document.createElement("article");
+      slot.className = "slot";
+      slot.dataset.slot = i;
+      slot.innerHTML = `
+        <div class="slot-number">${i + 1}</div>${i === 0 ? '<span class="leader-badge">LEADER</span>' : ''}
+        <div class="field">
+          <label for="character-${i}">角色</label>
+          <select id="character-${i}" class="character">${optionList(characters, "选择角色")}</select>
+        </div>
+        <div class="field">
+          <label for="attribute-${i}">属性</label>
+          <select id="attribute-${i}" class="attribute">${optionList(attributes, "选择属性")}</select>
+        </div>
+        <div class="field">
+          <label for="power-${i}">综合力</label>
+          <input id="power-${i}" class="power" type="number" min="0" inputmode="numeric" placeholder="例如 32000">
+        </div>
+        <div class="field">
+          <label for="bonus-${i}">活动加成 %</label>
+          <input id="bonus-${i}" class="bonus" type="number" min="0" step="0.1" inputmode="decimal" placeholder="例如 50">
+        </div>
+      `;
+      teamGrid.appendChild(slot);
+    }
+
+    function getSlots() {
+      return [...document.querySelectorAll(".slot")].map(slot => ({
+        character: slot.querySelector(".character").value,
+        attribute: slot.querySelector(".attribute").value,
+        power: Number(slot.querySelector(".power").value) || 0,
+        bonus: Number(slot.querySelector(".bonus").value) || 0
+      }));
+    }
+
+    function updateSummary() {
+      const slots = getSlots();
+      const selected = slots.filter(slot => slot.character);
+      const power = slots.reduce((sum, slot) => sum + slot.power, 0);
+      const bonus = slots.reduce((sum, slot) => sum + slot.bonus, 0);
+
+      memberCount.textContent = `${selected.length} / 5`;
+      totalPower.textContent = power.toLocaleString();
+      totalBonus.textContent = `${Number(bonus.toFixed(1))}%`;
+
+      const names = selected.map(slot => slot.character);
+      const duplicates = [...new Set(names.filter((name, index) => names.indexOf(name) !== index))];
+      warning.textContent = duplicates.length
+        ? `⚠️ 同一队伍不能重复同一角色：${duplicates.join("、")}`
+        : "";
+    }
+
+    function saveTeam() {
+      localStorage.setItem("pjsk-en-team-v1", JSON.stringify(getSlots()));
+      const oldText = document.getElementById("saveButton").textContent;
+      document.getElementById("saveButton").textContent = "已保存 ✓";
+      setTimeout(() => document.getElementById("saveButton").textContent = oldText, 1200);
+    }
+
+    function loadTeam() {
+      const raw = localStorage.getItem("pjsk-en-team-v1");
+      if (!raw) return;
+
+      try {
+        const saved = JSON.parse(raw);
+        document.querySelectorAll(".slot").forEach((slot, i) => {
+          if (!saved[i]) return;
+          slot.querySelector(".character").value = saved[i].character || "";
+          slot.querySelector(".attribute").value = saved[i].attribute || "";
+          slot.querySelector(".power").value = saved[i].power || "";
+          slot.querySelector(".bonus").value = saved[i].bonus || "";
+        });
+      } catch (error) {
+        console.warn("Saved team could not be loaded.", error);
+      }
+    }
+
+    function resetTeam() {
+      document.querySelectorAll("select, input").forEach(control => control.value = "");
+      localStorage.removeItem("pjsk-en-team-v1");
+      updateSummary();
+    }
+
+    teamGrid.addEventListener("input", updateSummary);
+    teamGrid.addEventListener("change", updateSummary);
+    document.getElementById("saveButton").addEventListener("click", saveTeam);
+    document.getElementById("resetButton").addEventListener("click", resetTeam);
+
+    loadTeam();
+    updateSummary();
   </script>
 </body>
 </html>
