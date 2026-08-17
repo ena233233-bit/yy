@@ -1,123 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#17131f">
-  <title>玻璃夜 · Galgame Prototype</title>
-  <style>
-    :root{--ink:#fff;--muted:#c8bfd5;--panel:rgba(14,10,22,.84);--line:rgba(255,255,255,.16);--pink:#ff84bc;--violet:#9c8cff}
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b0910;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button{font:inherit;color:inherit}
-    .game{position:relative;width:100%;height:100dvh;overflow:hidden;background:linear-gradient(145deg,#20243a,#281d33 45%,#12101a)}
-    .bg{position:absolute;inset:0;background-position:center;background-size:cover;filter:saturate(.92);transition:opacity .35s ease}.bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,5,12,.05),rgba(7,5,12,.22) 58%,rgba(7,5,12,.65))}
-    .fallback-bg{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.18);font-size:clamp(28px,7vw,64px);font-weight:1000;letter-spacing:.12em;background:radial-gradient(circle at 25% 20%,rgba(255,132,188,.17),transparent 30%),radial-gradient(circle at 80% 18%,rgba(156,140,255,.17),transparent 33%)}
-    .sprites{position:absolute;inset:0 0 150px;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}.sprite{position:absolute;bottom:0;max-height:86%;max-width:60%;object-fit:contain;filter:drop-shadow(0 12px 22px rgba(0,0,0,.38));transition:opacity .25s ease,transform .25s ease}.sprite.left{left:2%;transform:translateX(-2%)}.sprite.center{left:50%;transform:translateX(-50%)}.sprite.right{right:2%;transform:translateX(2%)}.sprite.hidden{opacity:0;visibility:hidden}
-    .sprite-placeholder{position:absolute;bottom:18px;width:min(34vw,260px);height:min(54vh,500px);display:grid;place-items:center;border:1px dashed rgba(255,255,255,.2);border-radius:24px;background:rgba(255,255,255,.035);color:rgba(255,255,255,.26);font-weight:900;letter-spacing:.08em;pointer-events:none}.sprite-placeholder.left{left:4%}.sprite-placeholder.center{left:50%;transform:translateX(-50%)}.sprite-placeholder.right{right:4%}
-    .top{position:absolute;z-index:20;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;justify-content:space-between;gap:8px}.pill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(10,7,16,.56);backdrop-filter:blur(8px);font-size:11px;color:var(--muted)}.top-actions{display:flex;gap:6px}.icon-btn{min-width:38px;height:34px;border:1px solid var(--line);border-radius:10px;background:rgba(10,7,16,.6);cursor:pointer}
-    .choices{position:absolute;z-index:25;left:50%;bottom:190px;width:min(90%,560px);transform:translateX(-50%);display:grid;gap:9px}.choices.hidden{display:none}.choice{min-height:48px;padding:10px 14px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(20,14,31,.88);backdrop-filter:blur(10px);font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.22)}.choice:active{transform:scale(.985)}
-    .textbox{position:absolute;z-index:30;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));min-height:132px;padding:20px 18px 16px;border:1px solid var(--line);border-radius:20px;background:var(--panel);backdrop-filter:blur(13px);box-shadow:0 18px 40px rgba(0,0,0,.35);cursor:pointer}.name{position:absolute;left:18px;top:-18px;min-width:110px;padding:8px 13px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,rgba(255,132,188,.95),rgba(156,140,255,.94));font-weight:950;box-shadow:0 8px 22px rgba(0,0,0,.2)}.dialogue{min-height:62px;font-size:clamp(15px,3vw,20px);line-height:1.65}.hint{position:absolute;right:14px;bottom:9px;color:var(--muted);font-size:10px}
-    .cg-layer{position:absolute;z-index:40;inset:0;display:grid;place-items:center;background:#09070d}.cg-layer.hidden{display:none}.cg-layer img{width:100%;height:100%;object-fit:contain}.cg-fallback{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.32);font-size:22px;font-weight:900}.cg-close{position:absolute;top:max(12px,env(safe-area-inset-top));right:12px;z-index:2;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.5);cursor:pointer}
-    .menu{position:absolute;z-index:50;inset:0;display:grid;place-items:center;padding:18px;background:rgba(7,5,12,.74);backdrop-filter:blur(10px)}.menu.hidden{display:none}.menu-card{width:min(100%,420px);padding:22px;border:1px solid var(--line);border-radius:20px;background:rgba(22,16,31,.96)}.menu-card h2{margin:0 0 8px}.menu-card p{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.6}.menu-actions{display:grid;gap:8px}.menu-btn{min-height:46px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.07);cursor:pointer}.menu-btn.primary{background:linear-gradient(135deg,#ff75b7,#927dff);font-weight:900}
-    @media(max-width:620px){.sprites{inset-bottom:142px}.sprite{max-width:74%;max-height:78%}.sprite-placeholder{width:42vw;height:45vh}.textbox{min-height:125px;padding:18px 14px 14px}.name{left:14px}.choices{bottom:178px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#17131f">
+<title>暑假最后三天 · 序章</title>
+<style>
+:root{--ink:#fff;--muted:#d8d0e2;--panel:rgba(17,13,24,.86);--line:rgba(255,255,255,.18);--pink:#ff8fbe;--violet:#9485ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0d0b11;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;color:inherit}
+.game{position:relative;width:100%;height:100dvh;overflow:hidden;background:#19141f}
+.bg,.bg-fallback{position:absolute;inset:0;width:100%;height:100%}
+.bg{object-fit:cover;object-position:center;transition:opacity .35s ease;filter:brightness(.86) saturate(.9)}
+.bg-fallback{display:grid;place-items:center;background:linear-gradient(145deg,#2b2433,#17131d);color:rgba(255,255,255,.16);font-weight:900;letter-spacing:.12em}
+.vignette{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.02) 45%,rgba(0,0,0,.54));pointer-events:none}
+.sprites{position:absolute;inset:0 0 112px;pointer-events:none;overflow:hidden}
+.sprite{position:absolute;bottom:-18vh;height:112vh;max-width:72vw;object-fit:contain;filter:drop-shadow(0 16px 20px rgba(0,0,0,.48));transition:opacity .2s ease,transform .22s ease,left .22s ease,right .22s ease}
+.sprite.left{left:-5vw}.sprite.center{left:50%;transform:translateX(-50%)}.sprite.right{right:-5vw}.sprite.hidden{opacity:0;visibility:hidden}
+.sprite-fallback{position:absolute;bottom:145px;width:190px;height:380px;border:1px dashed rgba(255,255,255,.18);border-radius:24px;display:none;place-items:center;background:rgba(20,15,25,.18);font-size:28px;font-weight:900;color:rgba(255,255,255,.38)}
+.sprite-fallback.left{left:7%}.sprite-fallback.center{left:50%;transform:translateX(-50%)}.sprite-fallback.right{right:7%}
+.topbar{position:absolute;z-index:20;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.timecard,.topbtn{border:1px solid var(--line);background:rgba(10,8,14,.58);backdrop-filter:blur(8px)}
+.timecard{padding:7px 11px;border-radius:999px;font-size:11px;color:var(--muted)}
+.actions{display:flex;gap:6px}.topbtn{height:34px;min-width:38px;border-radius:10px;cursor:pointer}
+.textbox{position:absolute;z-index:30;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));min-height:126px;padding:21px 17px 15px;border:1px solid var(--line);border-radius:20px;background:var(--panel);backdrop-filter:blur(12px);box-shadow:0 18px 42px rgba(0,0,0,.38);cursor:pointer}
+.name{position:absolute;left:16px;top:-18px;min-width:86px;padding:8px 13px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:linear-gradient(135deg,var(--pink),var(--violet));font-weight:950;text-align:center}
+.dialogue{min-height:60px;font-size:clamp(16px,2.3vw,20px);line-height:1.7;text-shadow:0 1px 2px #000}.hint{position:absolute;right:14px;bottom:9px;color:var(--muted);font-size:10px}
+.cg{position:absolute;z-index:45;inset:0;display:flex;align-items:center;justify-content:center;background:#050407;transition:opacity .3s ease}.cg.hidden{display:none}.cg img{width:100%;height:100%;object-fit:contain}.cg-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.35);font-weight:900}.cg-note{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:7px 12px;border-radius:999px;background:rgba(0,0,0,.58);font-size:11px;color:#ddd}
+.endcard{position:absolute;z-index:55;inset:0;display:none;place-items:center;padding:20px;background:rgba(8,6,11,.92);backdrop-filter:blur(10px)}.endcard.show{display:grid}.endinner{text-align:center;max-width:500px}.endinner h1{margin:0 0 8px;font-size:clamp(30px,7vw,54px)}.endinner p{color:var(--muted);line-height:1.7}.restart{margin-top:12px;padding:10px 18px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.08);cursor:pointer}
+.toast{position:absolute;z-index:70;left:50%;top:70px;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(0,0,0,.7);font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s}.toast.show{opacity:1}
+@media(max-width:700px){.sprite{height:105vh;bottom:-13vh;max-width:86vw}.sprite.left{left:-13vw}.sprite.right{right:-13vw}.textbox{min-height:122px}.sprites{inset-bottom:108px}}
+</style>
 </head>
 <body>
 <div class="game" id="game">
-  <div class="bg" id="bg"></div>
-  <div class="fallback-bg" id="bgFallback">BACKGROUND</div>
+  <div class="bg-fallback" id="bgFallback">BACKGROUND</div>
+  <img class="bg" id="bg" alt="背景">
+  <div class="vignette"></div>
 
   <div class="sprites">
-    <div class="sprite-placeholder left" id="phLeft">立绘 LEFT</div>
-    <div class="sprite-placeholder center" id="phCenter">立绘 CENTER</div>
-    <div class="sprite-placeholder right" id="phRight">立绘 RIGHT</div>
+    <div id="phLeft" class="sprite-fallback left"></div>
+    <div id="phCenter" class="sprite-fallback center"></div>
+    <div id="phRight" class="sprite-fallback right"></div>
     <img id="spriteLeft" class="sprite left hidden" alt="左侧立绘">
     <img id="spriteCenter" class="sprite center hidden" alt="中间立绘">
     <img id="spriteRight" class="sprite right hidden" alt="右侧立绘">
   </div>
 
-  <div class="top">
-    <div class="pill" id="chapter">CHAPTER 1 · 雨夜</div>
-    <div class="top-actions">
-      <button id="saveBtn" class="icon-btn" type="button" title="保存">💾</button>
-      <button id="menuBtn" class="icon-btn" type="button" title="菜单">☰</button>
-    </div>
+  <div class="topbar">
+    <div class="timecard" id="timecard">8月 · 暑假结束前三天</div>
+    <div class="actions"><button class="topbtn" id="saveBtn" type="button">💾</button><button class="topbtn" id="skipBtn" type="button">»</button></div>
   </div>
 
-  <div id="choices" class="choices hidden"></div>
-
-  <div id="textbox" class="textbox">
-    <div id="name" class="name">旁白</div>
-    <div id="dialogue" class="dialogue"></div>
+  <div class="textbox" id="textbox">
+    <div class="name" id="name">旁白</div>
+    <div class="dialogue" id="dialogue"></div>
     <div class="hint">点击继续 ▶</div>
   </div>
 
-  <div id="cgLayer" class="cg-layer hidden">
-    <div id="cgFallback" class="cg-fallback">CG 图片放这里</div>
-    <img id="cgImage" alt="CG">
-    <button id="cgClose" class="cg-close" type="button">关闭 CG</button>
+  <div class="cg hidden" id="cg">
+    <div class="cg-label" id="cgLabel">CG · 夜路</div>
+    <img id="cgImage" alt="GG与Fy走夜路CG">
+    <div class="cg-note">点击继续</div>
   </div>
 
-  <div id="menu" class="menu hidden">
-    <div class="menu-card">
-      <h2>玻璃夜</h2>
-      <p>这是 Galgame 骨架版。你可以把自己的背景、立绘、CG 放进 assets 文件夹，然后在剧情脚本里换成对应文件名。</p>
-      <div class="menu-actions">
-        <button id="continueBtn" class="menu-btn primary" type="button">继续游戏</button>
-        <button id="loadBtn" class="menu-btn" type="button">读取存档</button>
-        <button id="restartBtn" class="menu-btn" type="button">从头开始</button>
-      </div>
-    </div>
-  </div>
+  <div class="endcard" id="endcard"><div class="endinner"><h1>序章 · 1 END</h1><p>暑假还剩下三天。<br>对GG来说，这一天和平常没有任何不同。</p><button class="restart" id="restartBtn" type="button">重新开始</button></div></div>
+  <div class="toast" id="toast"></div>
 </div>
-
 <script>
-(()=>{"use strict";
+(()=>{'use strict';
 const $=id=>document.getElementById(id);
-const state={node:"start",vars:{trust:0,courage:0},typing:false,typingTimer:null,fullText:"",cgOpen:false};
-
-// 图片文件名只是示例。你把自己的图片上传到 galgame/assets/ 后，改这里即可。
-const ASSETS={
-  backgrounds:{rain:"assets/bg-rain.jpg",room:"assets/bg-room.jpg",roof:"assets/bg-roof.jpg"},
-  sprites:{hero:"assets/hero.png",friend:"assets/friend.png"},
-  cgs:{window:"assets/cg-window.jpg",ending:"assets/cg-ending.jpg"}
+const A={
+ bg:{room:'assets/bg-room.jpg',living:'assets/bg-living.jpg'},
+ bgFallback:{room:'assets/gg-bg-test.jpg'},
+ sp:{
+  ggSmile:'assets/gg-smile.png',ggSad:'assets/gg-sad.png',ggAngry:'assets/gg-angry.png',ggNeutral:'assets/gg-neutral.png',
+  fySmile:'assets/fy-smile.png',fyWorry:'assets/fy-worry.png',fyNeutral:'assets/fy-neutral.png',fyFlat:'assets/fy-flat.png'
+ },
+ spFallback:{ggSmile:'assets/gg-sprite-test.webp',ggSad:'assets/gg-sprite-test.webp',ggAngry:'assets/gg-sprite-test.webp',ggNeutral:'assets/gg-sprite-test.webp'},
+ cg:{night:'assets/cg-nightwalk.jpg'}
 };
-
-const story={
- start:{chapter:"CHAPTER 1 · 雨夜",bg:"rain",name:"旁白",text:"雨下得比预报更早。教学楼最后一盏灯，在玻璃窗里晃成模糊的白色。",sprites:{center:"hero"},next:"meet"},
- meet:{bg:"rain",name:"？？？",text:"“你还没走？”",sprites:{center:"hero"},next:"choice1"},
- choice1:{bg:"rain",name:"我",text:"门口的人撑着伞等我。我应该……",choices:[
-   {text:"跟她一起走",to:"walk",vars:{trust:1}},
-   {text:"说自己还有事",to:"stay",vars:{courage:1}}
- ]},
- walk:{bg:"rain",name:"她",text:"“那就快点。雨再大一点，我们两个人都会湿透。”",sprites:{left:"hero",right:"friend"},next:"walk2"},
- walk2:{bg:"room",name:"旁白",text:"我们在便利店屋檐下停住。她忽然看着玻璃里的倒影笑了。",sprites:{right:"friend"},cg:"window",next:"endingCheck"},
- stay:{bg:"roof",name:"旁白",text:"我一个人走上天台。风很大，门却在身后自己关上了。",sprites:{},next:"stay2"},
- stay2:{bg:"roof",name:"？？？",text:"“所以你果然会来这里。”",sprites:{center:"friend"},next:"endingCheck"},
- endingCheck:{name:"旁白",text:"某些决定看起来很小，但它们会悄悄改变之后发生的一切。",next:()=>state.vars.trust>state.vars.courage?"good":"other"},
- good:{bg:"room",name:"她",text:"“下次下雨的时候，也一起走吧。”",sprites:{center:"hero"},cg:"ending",next:"end"},
- other:{bg:"roof",name:"旁白",text:"夜色吞掉了最后一点光。故事还没有结束。",sprites:{center:"friend"},next:"end"},
- end:{name:"SYSTEM",text:"DEMO END · 你已经跑完这个 Galgame 骨架。可以继续往 story 里加章节、角色和分支。",sprites:{}}
-};
-
-function setBackground(key){const el=$("bg"),fallback=$("bgFallback"),src=ASSETS.backgrounds[key];if(!src){el.style.backgroundImage="";fallback.style.display="grid";return}const img=new Image();img.onload=()=>{el.style.backgroundImage=`url('${src}')`;fallback.style.display="none"};img.onerror=()=>{el.style.backgroundImage="";fallback.style.display="grid"};img.src=src}
-function setSprite(pos,key){const el=$("sprite"+pos[0].toUpperCase()+pos.slice(1)),ph=$("ph"+pos[0].toUpperCase()+pos.slice(1));if(!key){el.classList.add("hidden");ph.style.display="none";return}const src=ASSETS.sprites[key];if(!src){el.classList.add("hidden");ph.style.display="grid";return}el.onload=()=>{el.classList.remove("hidden");ph.style.display="none"};el.onerror=()=>{el.classList.add("hidden");ph.style.display="grid"};el.src=src}
-function setSprites(map={}){["left","center","right"].forEach(pos=>setSprite(pos,map[pos]))}
-function showCG(key){const src=ASSETS.cgs[key];if(!src)return;state.cgOpen=true;$("cgLayer").classList.remove("hidden");$("cgFallback").style.display="grid";$("cgImage").style.display="none";$("cgImage").onload=()=>{$("cgFallback").style.display="none";$("cgImage").style.display="block"};$("cgImage").onerror=()=>{$("cgFallback").style.display="grid";$("cgImage").style.display="none"};$("cgImage").src=src}
-function closeCG(){state.cgOpen=false;$("cgLayer").classList.add("hidden")}
-
-function typeText(text){clearInterval(state.typingTimer);state.fullText=text;state.typing=true;$("dialogue").textContent="";let i=0;state.typingTimer=setInterval(()=>{i+=2;$("dialogue").textContent=text.slice(0,i);if(i>=text.length){clearInterval(state.typingTimer);state.typing=false}},22)}
-function finishTyping(){if(!state.typing)return false;clearInterval(state.typingTimer);$("dialogue").textContent=state.fullText;state.typing=false;return true}
-
-function go(id){if(typeof id==="function")id=id();const node=story[id];if(!node)return;state.node=id;$("chapter").textContent=node.chapter||$("chapter").textContent;if(node.bg)setBackground(node.bg);if(node.sprites!==undefined)setSprites(node.sprites);$("name").textContent=node.name||"旁白";typeText(node.text||"");renderChoices(node.choices);if(node.cg)setTimeout(()=>showCG(node.cg),350)}
-function renderChoices(choices){const box=$("choices");box.innerHTML="";if(!choices?.length){box.classList.add("hidden");return}box.classList.remove("hidden");choices.forEach(choice=>{const b=document.createElement("button");b.className="choice";b.type="button";b.textContent=choice.text;b.onclick=e=>{e.stopPropagation();if(choice.vars)Object.entries(choice.vars).forEach(([k,v])=>state.vars[k]=(state.vars[k]||0)+v);box.classList.add("hidden");go(choice.to)};box.appendChild(b)})}
-function advance(){if(state.cgOpen)return;if(finishTyping())return;const node=story[state.node];if(node?.choices?.length)return;if(node?.next)go(node.next)}
-function save(){try{localStorage.setItem("glass-night-save",JSON.stringify({node:state.node,vars:state.vars}));$("saveBtn").textContent="✓";setTimeout(()=>$("saveBtn").textContent="💾",800)}catch(_){}}
-function load(){try{const raw=localStorage.getItem("glass-night-save");if(!raw)return;const data=JSON.parse(raw);state.vars=data.vars||{trust:0,courage:0};$("menu").classList.add("hidden");go(data.node||"start")}catch(_){}}
-function restart(){state.vars={trust:0,courage:0};$("menu").classList.add("hidden");go("start")}
-
-$("textbox").addEventListener("click",advance);$("cgClose").onclick=closeCG;$("cgLayer").addEventListener("click",e=>{if(e.target===$("cgLayer")||e.target===$("cgImage"))closeCG()});$("saveBtn").onclick=save;$("menuBtn").onclick=()=>$("menu").classList.remove("hidden");$("continueBtn").onclick=()=>$("menu").classList.add("hidden");$("loadBtn").onclick=load;$("restartBtn").onclick=restart;
-window.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="Enter"){e.preventDefault();advance()}else if(e.code==="Escape"){state.cgOpen?closeCG():$("menu").classList.toggle("hidden")}});
-go("start");
+const story=[
+ {t:'8月 · 暑假结束前三天 · 12:00',bg:'room',n:'旁白',x:'正午的光已经从窗帘缝里钻进来很久了。房间里却还是安静得像清晨。'},
+ {bg:'room',n:'旁白',x:'衣服、零食袋和不知道什么时候掉到地上的东西堆得到处都是。床上的人完全没有要醒的意思。'},
+ {bg:'room',n:'Fy',x:'GG。起床了。',sp:{r:'fySmile'}},
+ {bg:'room',n:'GG',x:'……嗯。',sp:{l:'ggSad',r:'fySmile'}},
+ {bg:'room',n:'Fy',x:'不是“嗯”。已经十二点了。',sp:{l:'ggSad',r:'fyFlat'}},
+ {bg:'room',n:'GG',x:'十二点也算早。暑假又不用上学。',sp:{l:'ggNeutral',r:'fyFlat'}},
+ {bg:'room',n:'Fy',x:'再过三天就开学了。你准备一直睡到开学当天吗？',sp:{l:'ggNeutral',r:'fySmile'}},
+ {bg:'room',n:'GG',x:'可以考虑。',sp:{l:'ggSmile',r:'fySmile'}},
+ {bg:'room',n:'Fy',x:'不可以。还有，你的书包收了吗？',sp:{l:'ggSmile',r:'fyFlat'}},
+ {bg:'room',n:'GG',x:'……书包不是一直都在那里吗。',sp:{l:'ggNeutral',r:'fyFlat'}},
+ {bg:'room',n:'Fy',x:'“在那里”和“收好了”是两回事。',sp:{l:'ggNeutral',r:'fyWorry'}},
+ {bg:'room',n:'旁白',x:'Fy看了一眼地面，又看了一眼床。沉默了两秒。'},
+ {bg:'room',n:'Fy',x:'先起来。至少先吃饭。',sp:{l:'ggSad',r:'fySmile'}},
+ {bg:'room',n:'GG',x:'你做？',sp:{l:'ggSmile',r:'fySmile'}},
+ {bg:'room',n:'Fy',x:'不然呢？让你自己做，我怕厨房比这个房间还惨。',sp:{l:'ggAngry',r:'fySmile'}},
+ {t:'12:18 · 客厅',bg:'living',n:'旁白',x:'十几分钟后，GG终于被Fy从床上弄了起来。锅里的水咕嘟咕嘟冒着泡。',sp:{l:'ggNeutral',r:'fyNeutral'}},
+ {bg:'living',n:'GG',x:'其实泡面我还是会的。',sp:{l:'ggNeutral',r:'fyNeutral'}},
+ {bg:'living',n:'Fy',x:'把开水倒进去不叫会做饭。',sp:{l:'ggAngry',r:'fySmile'}},
+ {bg:'living',n:'GG',x:'能吃就行。',sp:{l:'ggNeutral',r:'fySmile'}},
+ {bg:'living',n:'Fy',x:'你上次也是这么说，然后拿薯片当晚饭。',sp:{l:'ggSad',r:'fyWorry'}},
+ {bg:'living',n:'GG',x:'那天不饿。',sp:{l:'ggNeutral',r:'fyWorry'}},
+ {bg:'living',n:'Fy',x:'嗯。然后半夜两点来问我有没有吃的。',sp:{l:'ggSad',r:'fySmile'}},
+ {bg:'living',n:'旁白',x:'Fy把面端到桌上。热气升起来，GG总算彻底清醒了一点。'},
+ {bg:'living',n:'GG',x:'……好香。',sp:{l:'ggSmile',r:'fySmile'}},
+ {bg:'living',n:'Fy',x:'慢点吃。烫。',sp:{l:'ggSmile',r:'fySmile'}},
+ {bg:'living',n:'旁白',x:'这种对话已经发生过太多次，多到谁也没有觉得今天有什么特别。'},
+ {t:'19:42 · 夜',n:'旁白',x:'晚上，两个人出了门。白天残留的热气慢慢散掉，路灯一盏接一盏亮起来。',sp:{}},
+ {cg:'night',n:'Fy',x:'开学以后，别又为了成绩熬到凌晨。'},
+ {cg:'night',n:'GG',x:'你怎么比我爸妈还啰嗦。'},
+ {cg:'night',n:'Fy',x:'因为有人完全不会照顾自己。'},
+ {cg:'night',n:'GG',x:'……知道了。'},
+ {cg:'night',n:'旁白',x:'他们并肩往前走。谁也没有回头。'},
+ {end:true}
+];
+let i=0,typing=false,timer=null,full='',skip=false;
+function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1200)}
+function setBg(key){if(!key)return;const img=$('bg'),fallback=$('bgFallback');const primary=A.bg[key];const backup=A.bgFallback[key];fallback.style.display='grid';fallback.textContent=key==='room'?'GG 的房间':'客厅';img.style.opacity='0';if(!primary){return}img.onload=()=>{img.style.opacity='1';fallback.style.display='none'};img.onerror=()=>{if(backup&&img.src.indexOf(backup)<0){img.src=backup}else{img.style.opacity='0';fallback.style.display='grid'}};img.src=primary}
+function hidePos(pos){const cap=pos[0].toUpperCase()+pos.slice(1);$('sprite'+cap).classList.add('hidden');$('ph'+cap).style.display='none'}
+function setSprite(pos,key){const cap=pos[0].toUpperCase()+pos.slice(1),el=$('sprite'+cap),ph=$('ph'+cap);if(!key){hidePos(pos);return}const src=A.sp[key],backup=A.spFallback[key];ph.textContent=key.startsWith('fy')?'Fy':'GG';ph.style.display='none';el.classList.add('hidden');el.onload=()=>{el.classList.remove('hidden');ph.style.display='none'};el.onerror=()=>{if(backup&&el.src.indexOf(backup)<0){el.src=backup}else{el.classList.add('hidden');ph.style.display='grid'}};el.src=src}
+function setSprites(m={}){setSprite('left',m.l);setSprite('center',m.c);setSprite('right',m.r)}
+function type(s){clearInterval(timer);full=s;typing=true;$('dialogue').textContent='';if(skip){$('dialogue').textContent=s;typing=false;return}let p=0;timer=setInterval(()=>{p+=2;$('dialogue').textContent=s.slice(0,p);if(p>=s.length){clearInterval(timer);typing=false}},25)}
+function finish(){if(!typing)return false;clearInterval(timer);$('dialogue').textContent=full;typing=false;return true}
+function showCG(key){const layer=$('cg'),img=$('cgImage'),src=A.cg[key];layer.classList.remove('hidden');$('cgLabel').style.display='block';img.style.display='none';img.onload=()=>{$('cgLabel').style.display='none';img.style.display='block'};img.onerror=()=>{img.style.display='none';$('cgLabel').style.display='block'};img.src=src}
+function hideCG(){$('cg').classList.add('hidden')}
+function render(){const s=story[i];if(!s)return;if(s.end){hideCG();setSprites({});$('endcard').classList.add('show');return}if(s.t)$('timecard').textContent=s.t;if(s.bg){hideCG();setBg(s.bg)}if(s.sp!==undefined)setSprites(s.sp);if(s.cg)showCG(s.cg);$('name').textContent=s.n||'旁白';type(s.x||'')}
+function next(){if($('endcard').classList.contains('show'))return;if(finish())return;i=Math.min(i+1,story.length-1);render()}
+$('textbox').addEventListener('click',next);$('cg').addEventListener('click',next);document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();next()}});
+$('skipBtn').addEventListener('click',e=>{e.stopPropagation();skip=!skip;$('skipBtn').textContent=skip?'»»':'»';toast(skip?'快速文字：开':'快速文字：关')});
+$('saveBtn').addEventListener('click',e=>{e.stopPropagation();localStorage.setItem('gg-fy-prologue-save',String(i));toast('已保存')});
+$('restartBtn').addEventListener('click',()=>{i=0;$('endcard').classList.remove('show');hideCG();render()});
+const saved=Number(localStorage.getItem('gg-fy-prologue-save'));if(Number.isInteger(saved)&&saved>0&&saved<story.length){i=saved;toast('发现存档，已从存档继续')};render();
 })();
 </script>
 </body>
